@@ -1,5 +1,4 @@
 import { body, validationResult } from "express-validator";
-import { statusCodes } from "../utils/statusCodes.ts";
 
 const signUpValidationRules = [
   body("name").notEmpty().withMessage("Name is required"),

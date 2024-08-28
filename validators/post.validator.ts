@@ -1,5 +1,4 @@
 import { body, query, param, validationResult } from "express-validator";
-import { statusCodes } from "../utils/statusCodes.ts";
 // Create Post Validation Rules
 const createPostValidationRules = [
   body("title").notEmpty().withMessage("Title is required"),
