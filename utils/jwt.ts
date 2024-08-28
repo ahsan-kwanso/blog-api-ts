@@ -1,7 +1,14 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./settings.ts"
 
-export const generateToken = (user) => {
+// Define an interface for the user object
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export const generateToken = (user: User) => {
   const payload = {
     id: user.id,
     name: user.name,
