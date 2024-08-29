@@ -23,7 +23,7 @@ const getCommentDepth = async (commentId : number) => {
 };
 
 // Create a new comment
-const createComment = async (title : string, content : string, PostId : number, ParentId : number, UserId: number) => {
+const createComment = async (title : string, content : string, PostId : number, ParentId : number | null | undefined, UserId: number) => {
   const post = await Post.findByPk(PostId);
   if (!post) {
     return { success: false, message: "Post not Found" };

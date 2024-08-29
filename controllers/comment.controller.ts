@@ -37,7 +37,8 @@ const createComment = async (req: Request, res: Response): Promise<Response> => 
 const getCommentsByPostId = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { post_id } = req.params;
-    const result = await getCommentsByPostIdService(parseInt(post_id));
+    const postIdNumber = parseInt(post_id as string); // Explicitly cast post_id to string
+    const result = await getCommentsByPostIdService(postIdNumber);
     if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
     return res.status(OK).json(result.data);
   } catch (error) {

@@ -75,7 +75,8 @@ const getPostWithCommentsById = async (req: Request, res: Response): Promise<Res
   const { id } = req.params;
 
   try {
-    const result: PostWithCommentsByIdResult = await getPostWithCommentsByIdService(parseInt(id));
+    const postId = parseInt(id as string);
+    const result: PostWithCommentsByIdResult = await getPostWithCommentsByIdService(postId);
     if (!result.success) return res.status(BAD_REQUEST).json({ message: result.message });
     return res.status(OK).json(result.data || {});
   } catch (error) {

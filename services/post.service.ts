@@ -5,7 +5,7 @@ import { Request } from "express";
 import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
-
+import { PostInstance } from "../types/models.t.ts";
 
 const createPost = async (title : string, content : string, userId : number) => {
   const post = await Post.create({ title, content, UserId: userId });
@@ -35,7 +35,7 @@ const getPosts2 = async (req : Request) => {
   // Transform the fetched posts with author information
   const allPosts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -78,7 +78,7 @@ const getPosts = async (req : Request) => {
   });
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -103,6 +103,7 @@ const getMyPosts2 = async (req : Request) => {
   if (!userId) {
     return { success: true, posts: [], total: 0, nextPage: null }; // Return an empty result
   }
+  const numericUserId = Number(userId);
 
   // Validate pagination parameters
   const pagination = validatePagination(page as string, limit as string);
@@ -114,7 +115,7 @@ const getMyPosts2 = async (req : Request) => {
   // Fetch posts with pagination
   const { count, rows } = await db.Post.findAndCountAll({
     where: {
-      UserId: userId, // Filter posts by the current user's ID
+      UserId: numericUserId, // Filter posts by the current user's ID
     },
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -128,7 +129,7 @@ const getMyPosts2 = async (req : Request) => {
   });
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -175,7 +176,7 @@ const getMyPosts = async (req : Request) => {
   });
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -259,7 +260,7 @@ const searchPostsByTitle = async (req : Request) => {
 
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -308,7 +309,7 @@ const searchUserPostsByTitle = async (req : Request) => {
   });
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -331,7 +332,7 @@ const searchUserPostsByTitle = async (req : Request) => {
 const searchUserPostsByTitle2 = async (req : Request) => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
   const userId = req.query.userId; // Extract UserId from query as sent from front end
-
+  const numericUserId = Number(userId);
   // Validate pagination parameters
   const pagination = validatePagination(page as string, limit as string);
   if (pagination.error) {
@@ -345,7 +346,7 @@ const searchUserPostsByTitle2 = async (req : Request) => {
       title: {
         [Op.iLike]: `%${title}%`, // Case-insensitive search
       },
-      UserId: userId, // Filter by UserId
+      UserId: numericUserId, // Filter by UserId
     },
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -358,7 +359,7 @@ const searchUserPostsByTitle2 = async (req : Request) => {
   });
   const posts = rows.map((post) => ({
     id: post.id,
-    author: post.User.name, // Access the user's name
+    author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
