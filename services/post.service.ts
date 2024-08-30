@@ -7,6 +7,15 @@ import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts"
 import paginationConfig from "../utils/pagination.config.ts";
 import { CustomRequest, User as UserInterface } from "../types/CustomRequest.ts";
 
+
+interface Post {
+  id: number;
+  author? : typeof User;
+  title: string;
+  content: string;
+  updatedAt: Date; // Formatted as YYYY-MM-DD
+}
+
 const createPost = async (title : string, content : string, userId : number) => {
   const post = await Post.create({ title, content, UserId: userId });
   return post;
@@ -33,9 +42,10 @@ const getPosts2 = async (req : Request) => {
   });
 
   // Transform the fetched posts with author information
-  const allPosts  = rows.map((post) => ({
+  const allPosts  = rows.map((post : Post) => ({
     id: post.id,
-    author: post?.User?.name, // Access the user's name
+    //@ts-ignore
+    author: post.User ? post.User.name : undefined,
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -76,8 +86,9 @@ const getPosts = async (req : Request) => {
     ],
     order: [["createdAt", "DESC"]],
   });
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -127,8 +138,9 @@ const getMyPosts2 = async (req : Request) => {
     ],
     order: [["createdAt", "DESC"]],
   });
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -173,8 +185,9 @@ const getMyPosts = async (req : CustomRequest) => {
       },
     ],
   });
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -257,8 +270,9 @@ const searchPostsByTitle = async (req : Request) => {
     ],
   });
 
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -306,8 +320,9 @@ const searchUserPostsByTitle = async (req : Request) => {
       },
     ],
   });
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -339,6 +354,7 @@ const searchUserPostsByTitle2 = async (req : Request) => {
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
 
+
   // Fetch posts with pagination and search by title for the authenticated user
   const { count, rows } = await db.Post.findAndCountAll({
     where: {
@@ -356,8 +372,9 @@ const searchUserPostsByTitle2 = async (req : Request) => {
       },
     ],
   });
-  const posts = rows.map((post) => ({
+  const posts = rows.map((post : Post) => ({
     id: post.id,
+    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,

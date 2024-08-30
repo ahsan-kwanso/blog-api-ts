@@ -18,7 +18,9 @@ db.Post = Post;
 db.Comment = Comment;
 
 Object.keys(db).forEach((modelName) => {
+  //@ts-ignore
   if (db[modelName].associate) {
+    //@ts-ignore
     db[modelName].associate(db);
   }
 });

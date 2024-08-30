@@ -6,22 +6,61 @@ import { getCommentsByPostIdData as getCommentsByPostIdDataService } from "./com
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
 import { CustomRequest, User } from "../types/CustomRequest.ts";
+
+// Define interfaces for your data
+interface Comment {
+  id: number;
+  title: string;
+  content: string;
+  UserId: number;
+  PostId: number;
+  ParentId: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  subComments: Comment[];
+}
+
+interface Post {
+  id: number;
+  title: string;
+  content: string;
+  UserId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  comments: Comment[];
+}
+
+interface PaginationResponse<T> {
+  total: number;
+  page: number;
+  pageSize: number;
+  nextPage: string | null;
+  posts: T[];
+}
+
 // Utility function to get posts with nested comments
-const getPostsWithNestedComments = async (posts) => {
+const getPostsWithNestedComments = async (posts: Post[]): Promise<Post[]> => {
   return await Promise.all(
     posts.map(async (post) => {
-      const postId = post.id; // Adjust according to your actual post model
+      const postId = post.id;
       const comments = await getCommentsByPostIdDataService(postId);
       return {
-        ...post.toJSON(),
-        comments: comments, // Adjust according to the response structure from getCommentsByPostIdData
+        //@ts-ignore
+        ...post.dataValues,
+        comments: comments as Comment[], // Adjust according to your actual response structure
       };
     })
   );
 };
 
 // Utility function to format pagination response
-const formatPaginationResponse = (data, totalItems : number, pageNumber : number, pageSize : number, req : Request) => {
+const formatPaginationResponse = (
+  data: Post[],
+  totalItems: number,
+  pageNumber: number,
+  pageSize: number,
+  req: Request
+): PaginationResponse<Post> => {
   const totalPages = Math.ceil(totalItems / pageSize);
   const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
   const nextPageUrl = generateNextPageUrl(nextPage, pageSize, req);
@@ -35,7 +74,7 @@ const formatPaginationResponse = (data, totalItems : number, pageNumber : number
 };
 
 // Get posts with nested comments
-const getPostsWithComments = async (req : Request) => {
+const getPostsWithComments = async (req: Request): Promise<{ success: boolean; data?: PaginationResponse<Post>; message?: string }> => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
 
   const pagination = validatePagination(page as string, limit as string);
@@ -57,12 +96,12 @@ const getPostsWithComments = async (req : Request) => {
 };
 
 // Get posts by user with nested comments
-const getPostsByUserWithComments = async (req : CustomRequest) => {
+const getPostsByUserWithComments = async (req: CustomRequest): Promise<{ success: boolean; data?: PaginationResponse<Post>; message?: string }> => {
   const { user_id } = req.params;
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
   const { id } = req.user as User;
   if (parseInt(user_id) !== id) {
-    return { success: false, message: "ForBidden" };
+    return { success: false, message: "Forbidden" };
   }
 
   const pagination = validatePagination(page as string, limit as string);
@@ -85,7 +124,7 @@ const getPostsByUserWithComments = async (req : CustomRequest) => {
 };
 
 // Search posts by title or content
-const searchPostsByTitleOrContent = async (req : Request) => {
+const searchPostsByTitleOrContent = async (req: Request): Promise<{ success: boolean; data?: PaginationResponse<Post>; message?: string }> => {
   const { title = "", content = "", page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
   if (!title && !content) {
     return {
@@ -116,14 +155,16 @@ const searchPostsByTitleOrContent = async (req : Request) => {
   return { success: true, data: data };
 };
 
-const getPostWithCommentsById = async (postId : number) => {
+const getPostWithCommentsById = async (postId: number): Promise<{ success: boolean; data?: Post; message?: string }> => {
   try {
-    // Fetch the post by ID
     const posts = await Post.findAll();
 
     const postsWithComments = await getPostsWithNestedComments(posts);
-    const postWithComments = postsWithComments.filter((post) => post.id === postId);
-    return { success: true, data: postWithComments[0] };
+    const postWithComments = postsWithComments.find((post) => post.id === postId);
+    if (!postWithComments) {
+      return { success: false, message: "Post not found" };
+    }
+    return { success: true, data: postWithComments };
   } catch (error) {
     console.error("Error fetching post with comments:", error);
     return { success: false, message: "Internal server error" };

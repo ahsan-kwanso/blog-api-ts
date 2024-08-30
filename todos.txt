@@ -1,3 +1,6 @@
 will see that ts ignore lines
 will make models in ts, this is i guess the most difficult and important as well because changing my models is creating lot of issues in my services
 will resolve other parts as well
+
+
+add return type to services as well

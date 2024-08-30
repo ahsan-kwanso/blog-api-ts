@@ -38,6 +38,7 @@ const User = sequelize.define(
       },
     },
     hooks: {
+      //@ts-ignore
       beforeSave: async (user) => {
         if (user.changed("password")) {
           const salt = await bcrypt.genSalt(10);

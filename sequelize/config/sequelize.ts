@@ -5,6 +5,7 @@ import { NODE_ENV } from "../../utils/settings.ts";
 dotenv.config();
 
 const env = NODE_ENV || "development";
+//@ts-ignore
 const config = configFile[env];
 
 let sequelize : any;
