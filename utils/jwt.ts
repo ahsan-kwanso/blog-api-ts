@@ -1,12 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./settings.ts"
-
-// Define an interface for the user object
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+import { User } from "../types/CustomRequest.ts";
 
 export const generateToken = (user: User) => {
   const payload = {
@@ -14,6 +8,6 @@ export const generateToken = (user: User) => {
     name: user.name,
     email: user.email,
   };
-  //@ts-ignore
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "3h" });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: "3h" });
+  //The ! operator tells TypeScript that you are confident JWT_SECRET is not undefined.
 };
