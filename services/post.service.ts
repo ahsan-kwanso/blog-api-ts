@@ -5,6 +5,7 @@ import { Request } from "express";
 import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
+import { CustomRequest, User as UserInterface } from "../types/CustomRequest.ts";
 
 const createPost = async (title : string, content : string, userId : number) => {
   const post = await Post.create({ title, content, UserId: userId });
@@ -147,11 +148,10 @@ const getMyPosts2 = async (req : Request) => {
   };
 };
 
-const getMyPosts = async (req : Request) => {
+const getMyPosts = async (req : CustomRequest) => {
   // Other one created as according to requirements of blog app
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-  //@ts-ignore
-  const userId = req.user.id;
+  const { id } = req.user as UserInterface;
   // Validate pagination parameters
   const pagination = validatePagination(page as string, limit as string);
   if (pagination.error) {
@@ -162,7 +162,7 @@ const getMyPosts = async (req : Request) => {
   // Fetch posts with pagination
   const { count, rows } = await db.Post.findAndCountAll({
     where: {
-      UserId: userId, // Filter posts by the current user's ID
+      UserId: id, // Filter posts by the current user's ID
     },
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,

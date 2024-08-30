@@ -5,6 +5,7 @@ import { Request } from "express";
 import { getCommentsByPostIdData as getCommentsByPostIdDataService } from "./comment.service.ts";
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
+import { CustomRequest, User } from "../types/CustomRequest.ts";
 // Utility function to get posts with nested comments
 const getPostsWithNestedComments = async (posts) => {
   return await Promise.all(
@@ -56,11 +57,10 @@ const getPostsWithComments = async (req : Request) => {
 };
 
 // Get posts by user with nested comments
-const getPostsByUserWithComments = async (req : Request) => {
+const getPostsByUserWithComments = async (req : CustomRequest) => {
   const { user_id } = req.params;
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-  //@ts-ignore
-  const { id } = req.user;
+  const { id } = req.user as User;
   if (parseInt(user_id) !== id) {
     return { success: false, message: "ForBidden" };
   }
