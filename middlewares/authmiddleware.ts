@@ -2,18 +2,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { UNAUTHORIZED, FORBIDDEN } from "http-status-codes";
 import { Request, Response, NextFunction } from "express";
 import { JWT_SECRET } from "../utils/settings.ts";
+import { User } from "../types/CustomRequest.ts";
+import { CustomRequest } from "../types/CustomRequest.ts";
 
-// Define an interface for the user object
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-// Extend Express Request interface to include the user property
-interface CustomRequest extends Request {
-  user?: User | JwtPayload;
-}
 
 export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFunction) => {
   const token = req.header("Authorization")?.split(" ")[1];

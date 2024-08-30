@@ -8,6 +8,7 @@ import {
 } from "../services/comment.service.ts";
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUND } from "http-status-codes";
 import { Request, Response } from "express";
+import { CustomRequest, User } from "../types/CustomRequest.ts";
 
 // Define interfaces for service results
 interface CommentResult {
@@ -17,11 +18,9 @@ interface CommentResult {
 }
 
 
-const createComment = async (req: Request, res: Response): Promise<Response> => {
+const createComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { title = "reply", content, PostId, ParentId } = req.body;
-  //@ts-ignore
-  const { id } = req.user; // Extract UserId from authenticated user
-
+  const { id } = req.user as User; // Extract UserId from authenticated user
   try {
     const result: CommentResult = await createCommentService(title, content, PostId, ParentId, id);
     if (!result.success) {
@@ -58,11 +57,10 @@ const getCommentById = async (req: Request, res: Response): Promise<Response> =>
   }
 };
 
-const updateComment = async (req: Request, res: Response): Promise<Response> => {
+const updateComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
   const { title, content } = req.body;
-  //@ts-ignore
-  const { id } = req.user;
+  const { id } = req.user as User;
 
   try {
     const result: CommentResult = await updateCommentService(parseInt(comment_id), title, content, id);
@@ -76,10 +74,9 @@ const updateComment = async (req: Request, res: Response): Promise<Response> => 
   }
 };
 
-const deleteComment = async (req: Request, res: Response): Promise<Response> => {
+const deleteComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
-  //@ts-ignore
-  const { id } = req.user;
+  const { id } = req.user as User;
 
   try {
     const result: CommentResult = await deleteCommentService(parseInt(comment_id), id);

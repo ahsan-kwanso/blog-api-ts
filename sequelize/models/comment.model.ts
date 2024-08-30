@@ -43,6 +43,7 @@ const Comment = sequelize.define("Comments", {
   },
 });
 
+//@ts-ignore
 Comment.associate = (models) => {
   Comment.belongsTo(models.User, {
     foreignKey: "UserId",

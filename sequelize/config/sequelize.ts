@@ -7,7 +7,7 @@ dotenv.config();
 const env = NODE_ENV || "development";
 const config = configFile[env];
 
-let sequelize;
+let sequelize : any;
 if (env === "production") {
   sequelize = new Sequelize(config.production_db_url, {
     dialect: config.dialect,

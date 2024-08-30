@@ -12,6 +12,7 @@ import {
   searchUserPostsByTitle2 as searchUserPostsByTitle2Service,
 } from "../services/post.service.ts";
 import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
+import { CustomRequest } from "../types/CustomRequest.ts";
 
 // Define interfaces for service results
 interface PostResult {
@@ -31,9 +32,8 @@ interface PostsResult {
 }
 
 // Create a new post
-const createPost = async (req: Request, res: Response): Promise<Response> => {
+const createPost = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { title, content } = req.body;
-  //@ts-ignore
   const { id } = req.user as { id: number }; // Assuming `req.user` has an `id` field
 
   try {
@@ -100,10 +100,9 @@ const getPostById = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // Update a post by ID
-const updatePost = async (req: Request, res: Response): Promise<Response> => {
+const updatePost = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { post_id } = req.params;
   const { title, content } = req.body;
-  //@ts-ignore
   const { id } = req.user as { id: number };
 
   try {
@@ -119,9 +118,8 @@ const updatePost = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // Delete a post by ID
-const deletePost = async (req: Request, res: Response): Promise<Response> => {
+const deletePost = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { post_id } = req.params;
-  //@ts-ignore
   const { id } = req.user as { id: number };
 
   try {

@@ -5,7 +5,6 @@ import { Request } from "express";
 import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
-import { PostInstance } from "../types/models.t.ts";
 
 const createPost = async (title : string, content : string, userId : number) => {
   const post = await Post.create({ title, content, UserId: userId });
@@ -33,7 +32,7 @@ const getPosts2 = async (req : Request) => {
   });
 
   // Transform the fetched posts with author information
-  const allPosts = rows.map((post) => ({
+  const allPosts  = rows.map((post) => ({
     id: post.id,
     author: post?.User?.name, // Access the user's name
     title: post.title,

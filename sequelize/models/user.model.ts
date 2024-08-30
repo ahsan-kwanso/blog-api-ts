@@ -48,6 +48,7 @@ const User = sequelize.define(
   }
 );
 
+//@ts-ignore
 User.associate = function (models) {
   User.hasMany(models.Post, {
     foreignKey: "UserId",
