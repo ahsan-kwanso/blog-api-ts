@@ -1,24 +1,24 @@
 import User from "../sequelize/models/user.model.ts";
 import { ERROR_MESSAGES, AuthStatus } from "../utils/messages.ts";
 // // Define the User interface (extend this based on your User model's attributes)
-// interface UserAtt {
-//   id: number;
-//   name: string;
-//   email: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-// }
+interface UserAtt {
+  id: number;
+  name: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Define interfaces for service results
 interface UserResult {
   success: boolean;
   message?: string;
-  user?: typeof User;
+  user?: UserAtt;
 }
 
 interface UsersResult {
   success: boolean;
-  users?: typeof User[];
+  users?:  UserAtt[];
 }
 
 // Function to get a user by ID
