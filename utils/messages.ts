@@ -18,3 +18,8 @@ export enum CommentStatus {
     CANNOT_REPLY_TO_NON_EXISTING_COMMENT = "You can't reply to a non-existing comment",
     COMMENT_DELETED_SUCCESSFULLY = "Comment deleted successfully",
 }
+
+export enum PostStatus {
+    POST_NOT_FOUND = "Post not Found",
+    POST_DELETED_SUCCESSFULLY = "Post deleted successfully",
+}

@@ -5,25 +5,52 @@ import { Request } from "express";
 import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
-import { CustomRequest, User as UserInterface } from "../types/CustomRequest.ts";
+import { ERROR_MESSAGES, PostStatus } from "../utils/messages.ts";
 
-
-interface Post {
+interface PostAttributes {
   id: number;
-  author? : typeof User;
   title: string;
   content: string;
-  updatedAt: Date; // Formatted as YYYY-MM-DD
+  UserId: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const createPost = async (title : string, content : string, userId : number) => {
+interface PostWithUser extends PostAttributes {
+  User?: {
+    name: string;
+  };
+}
+
+interface PostResponse {
+  id: number;
+  author?: string;
+  title: string;
+  content: string;
+  date: string;
+}
+
+interface PaginatedPostsResponse {
+  success? : boolean;
+  posts: PostResponse[];
+  total: number;
+  page?: number;
+  pageSize?: number;
+  nextPage: string | null;
+}
+interface ErrorResponse {
+  success: false;
+  message: string;
+}
+
+
+const createPost = async (title: string, content: string, userId: number): Promise<PostAttributes> => {
   const post = await Post.create({ title, content, UserId: userId });
   return post;
 };
 
-const getPosts2 = async (req : Request) => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-
+const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
+  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, filter } = req.query;
   // Validate pagination parameters
   const pagination = validatePagination(page as string, limit as string);
   if (pagination.error) {
@@ -31,49 +58,6 @@ const getPosts2 = async (req : Request) => {
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
 
-  // Fetch all posts with author information
-  const { count, rows } = await db.Post.findAndCountAll({
-    include: [
-      {
-        model: User,
-        attributes: ["name"], // Fetch only the name attribute from the User model
-      },
-    ],
-  });
-
-  // Transform the fetched posts with author information
-  const allPosts  = rows.map((post : Post) => ({
-    id: post.id,
-    //@ts-ignore
-    author: post.User ? post.User.name : undefined,
-    title: post.title,
-    content: post.content,
-    date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
-  }));
-
-  // Apply pagination to the transformed posts
-  const startIndex = (pageNumber - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedPosts = allPosts.slice(startIndex, endIndex);
-
-  // Calculate pagination details
-  const totalPages = Math.ceil(count / pageSize);
-  const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
-
-  return {
-    posts: paginatedPosts,
-    total: count,
-    page: pageNumber,
-    pageSize: pageSize,
-    nextPage: generateNextPageUrl(nextPage, pageSize, req),
-  };
-};
-
-const getPosts = async (req : Request) => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, filter } = req.query;
-  // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
-  const { pageNumber = 1, pageSize = 10 } = pagination;
   // Fetch posts with pagination
   const { count, rows } = await db.Post.findAndCountAll({
     limit: pageSize,
@@ -86,10 +70,10 @@ const getPosts = async (req : Request) => {
     ],
     order: [["createdAt", "DESC"]],
   });
-  const posts = rows.map((post : Post) => ({
+
+  const posts: PostResponse[] = rows.map((post: PostWithUser) => ({
     id: post.id,
-    //@ts-ignore
-    author: post?.User?.name, // Access the user's name
+    author: post.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -108,12 +92,14 @@ const getPosts = async (req : Request) => {
   };
 };
 
-const getMyPosts2 = async (req : Request) => {
+const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-  const userId = req.query.userId;
+  const userId = req.query.userId as string;
+
   if (!userId) {
     return { success: true, posts: [], total: 0, nextPage: null }; // Return an empty result
   }
+
   const numericUserId = Number(userId);
 
   // Validate pagination parameters
@@ -138,10 +124,10 @@ const getMyPosts2 = async (req : Request) => {
     ],
     order: [["createdAt", "DESC"]],
   });
-  const posts = rows.map((post : Post) => ({
+
+  const posts: PostResponse[] = rows.map((post: PostWithUser) => ({
     id: post.id,
-    //@ts-ignore
-    author: post?.User?.name, // Access the user's name
+    author: post.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
     date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
@@ -160,91 +146,44 @@ const getMyPosts2 = async (req : Request) => {
   };
 };
 
-const getMyPosts = async (req : CustomRequest) => {
-  // Other one created as according to requirements of blog app
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-  const { id } = req.user as UserInterface;
-  // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
-  if (pagination.error) {
-    return { success: false, message: pagination.error };
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
-
-  // Fetch posts with pagination
-  const { count, rows } = await db.Post.findAndCountAll({
-    where: {
-      UserId: id, // Filter posts by the current user's ID
-    },
-    limit: pageSize,
-    offset: (pageNumber - 1) * pageSize,
-    include: [
-      {
-        model: User,
-        attributes: ["name"], // Fetch only the name attribute from the User model
-      },
-    ],
-  });
-  const posts = rows.map((post : Post) => ({
-    id: post.id,
-    //@ts-ignore
-    author: post?.User?.name, // Access the user's name
-    title: post.title,
-    content: post.content,
-    date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
-  }));
-
-  // Calculate pagination details
-  const totalPages = Math.ceil(count / pageSize);
-  const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
-
-  return {
-    posts,
-    total: count,
-    page: pageNumber,
-    pageSize: pageSize,
-    nextPage: generateNextPageUrl(nextPage, pageSize, req),
-  };
-};
-
-const getPostById = async (postId : number) => {
+const getPostById = async (postId: number): Promise<{ success: boolean; post?: PostAttributes; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: "Post not Found" };
+    return { success: false, message: PostStatus.POST_NOT_FOUND };
   }
-  return { success: true, post: post };
+  return { success: true, post };
 };
 
-const updatePost = async (postId : number, title : string, content : string, userId : number) => {
+const updatePost = async (postId: number, title: string, content: string, userId: number): Promise<{ success: boolean; post?: PostAttributes; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: "Post not Found" };
+    return { success: false, message: PostStatus.POST_NOT_FOUND };
   }
   if (post.UserId !== userId) {
-    return { success: false, message: "ForBidden" };
+    return { success: false, message: ERROR_MESSAGES.FORBIDDEN};
   }
 
   post.title = title || post.title;
   post.content = content || post.content;
   await post.save();
 
-  return { success: true, post: post };
+  return { success: true, post };
 };
 
-const deletePost = async (postId : number, userId : number) => {
+const deletePost = async (postId: number, userId: number): Promise<{ success: boolean; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: "Post not Found" };
+    return { success: false, message: PostStatus.POST_NOT_FOUND };
   }
   if (post.UserId !== userId) {
-    return { success: false, message: "ForBidden" };
+    return { success: false, message: ERROR_MESSAGES.FORBIDDEN};
   }
 
   await post.destroy();
-  return { success: true, message: "Post deleted successfully" };
+  return { success: true, message: PostStatus.POST_DELETED_SUCCESSFULLY };
 };
 
-const searchPostsByTitle = async (req : Request) => {
+const searchPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
 
   // Validate pagination parameters
@@ -270,9 +209,8 @@ const searchPostsByTitle = async (req : Request) => {
     ],
   });
 
-  const posts = rows.map((post : Post) => ({
+  const posts: PostResponse[] = rows.map((post: PostWithUser) => ({
     id: post.id,
-    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -292,58 +230,7 @@ const searchPostsByTitle = async (req : Request) => {
   };
 };
 
-const searchUserPostsByTitle = async (req : Request) => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
-  //@ts-ignore
-  const userId = req.user.id;
-  // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
-  if (pagination.error) {
-    return { success: false, message: pagination.error };
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
-
-  // Fetch posts with pagination and search by title for the authenticated user
-  const { count, rows } = await db.Post.findAndCountAll({
-    where: {
-      title: {
-        [Op.iLike]: `%${title}%`, // Case-insensitive search
-      },
-      UserId: userId, // Filter by UserId
-    },
-    limit: pageSize,
-    offset: (pageNumber - 1) * pageSize,
-    include: [
-      {
-        model: db.User,
-        attributes: ["name"], // Fetch only the name attribute from the User model
-      },
-    ],
-  });
-  const posts = rows.map((post : Post) => ({
-    id: post.id,
-    //@ts-ignore
-    author: post?.User?.name, // Access the user's name
-    title: post.title,
-    content: post.content,
-    date: post.updatedAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
-  }));
-
-  // Calculate pagination details
-  const totalPages = Math.ceil(count / pageSize);
-  const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
-
-  return {
-    posts,
-    total: count,
-    page: pageNumber,
-    pageSize: pageSize,
-    nextPage: generateNextPageUrl(nextPage, pageSize, req),
-  };
-};
-
-//these second services are added later as we want custom auth not jwt changes are made according to frontend req
-const searchUserPostsByTitle2 = async (req : Request) => {
+const searchUserPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
   const userId = req.query.userId; // Extract UserId from query as sent from front end
   const numericUserId = Number(userId);
@@ -372,9 +259,8 @@ const searchUserPostsByTitle2 = async (req : Request) => {
       },
     ],
   });
-  const posts = rows.map((post : Post) => ({
+  const posts: PostResponse[] = rows.map((post: PostWithUser) => ({
     id: post.id,
-    //@ts-ignore
     author: post?.User?.name, // Access the user's name
     title: post.title,
     content: post.content,
@@ -400,10 +286,8 @@ export {
   getPostById,
   updatePost,
   deletePost,
-  getMyPosts,
   searchPostsByTitle,
+  getMyPosts,
   searchUserPostsByTitle,
-  getMyPosts2,
-  searchUserPostsByTitle2,
 };
 

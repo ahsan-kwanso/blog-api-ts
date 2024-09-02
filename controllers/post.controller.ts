@@ -2,17 +2,16 @@ import { Request, Response } from "express";
 import {
   createPost as createPostService,
   getPosts as getPostsService,
-  getMyPosts as getMyPostsService,
   getPostById as getPostByIdService,
   updatePost as updatePostService,
   deletePost as deletePostService,
   searchPostsByTitle as searchPostsByTitleService,
+  getMyPosts as getMyPostsService,
   searchUserPostsByTitle as searchUserPostsByTitleService,
-  getMyPosts2 as getMyPosts2Service,
-  searchUserPostsByTitle2 as searchUserPostsByTitle2Service,
 } from "../services/post.service.ts";
 import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
 import { CustomRequest } from "../types/CustomRequest.ts";
+import { ERROR_MESSAGES } from "../utils/messages.ts";
 
 // Define interfaces for service results
 interface PostResult {
@@ -40,7 +39,7 @@ const createPost = async (req: CustomRequest, res: Response): Promise<Response> 
     const post = await createPostService(title, content, id);
     return res.status(CREATED).json({ post });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -52,7 +51,7 @@ const getPosts = async (req: Request, res: Response): Promise<Response> => {
 
     if (filter === "my-posts" && req.query.userId) {
       // If filter is "my-posts", call getMyPosts2 service
-      data = await getMyPosts2Service(req);
+      data = await getMyPostsService(req);
     } else {
       // Otherwise, call the regular getPostsService
       data = await getPostsService(req);
@@ -66,23 +65,7 @@ const getPosts = async (req: Request, res: Response): Promise<Response> => {
       posts: data.posts,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
-  }
-};
-
-// Get posts of the current user
-const getMyPosts = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const data: PostsResult = await getMyPostsService(req);
-    return res.status(OK).json({
-      total: data.total,
-      page: data.page,
-      pageSize: data.pageSize,
-      nextPage: data.nextPage,
-      posts: data.posts,
-    });
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -95,7 +78,7 @@ const getPostById = async (req: Request, res: Response): Promise<Response> => {
     if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
     return res.status(OK).json(result.post);
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -113,7 +96,7 @@ const updatePost = async (req: CustomRequest, res: Response): Promise<Response> 
     }
     return res.status(OK).json(result.post);
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -130,7 +113,7 @@ const deletePost = async (req: CustomRequest, res: Response): Promise<Response> 
     }
     return res.status(OK).json({ message: result.message });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -141,7 +124,7 @@ const getPostsByTitle = async (req: Request, res: Response): Promise<Response> =
     let data: PostsResult;
 
     if (filter === "my-posts" && req.query.userId) {
-      data = await searchUserPostsByTitle2Service(req);
+      data = await searchUserPostsByTitleService(req);
     } else {
       data = await searchPostsByTitleService(req);
     }
@@ -154,24 +137,9 @@ const getPostsByTitle = async (req: Request, res: Response): Promise<Response> =
       posts: data.posts,
     });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
-// Search posts by title for the current user
-const searchUserPostsByTitle = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const data: PostsResult = await searchUserPostsByTitleService(req);
-    return res.status(OK).json({
-      total: data.total,
-      page: data.page,
-      pageSize: data.pageSize,
-      nextPage: data.nextPage,
-      posts: data.posts,
-    });
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
-  }
-};
 
-export { createPost, getPosts, getPostById, updatePost, deletePost, getMyPosts, getPostsByTitle, searchUserPostsByTitle };
+export { createPost, getPosts, getPostById, updatePost, deletePost, getPostsByTitle };

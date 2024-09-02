@@ -6,8 +6,11 @@ will resolve other parts as well
 add return type to services as well
 
 refactor the code
-add generics
-further add return types
+further add return types -> doing this after services work move to utils and validators to see if there's any room for improvement, then move to connections and models, after doing all of this move to frontend
+separate the interfaces
+
+
+
 modify the connection
 modify the models accordingly
 test your application as well
