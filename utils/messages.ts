@@ -9,4 +9,12 @@ export enum AuthStatus {
     SIGN_UP_ERROR = "An error occurred during sign-up.",
     SIGN_IN_ERROR = "An error occurred during sign-in.",
     USER_NOT_FOUND = "User not found",
-  }
+}
+
+export enum CommentStatus {
+    POST_NOT_FOUND = "Post not Found",
+    COMMENT_NOT_FOUND = "Comment not Found",
+    COMMENT_NOT_ON_POST = "This comment is not on post",
+    CANNOT_REPLY_TO_NON_EXISTING_COMMENT = "You can't reply to a non-existing comment",
+    COMMENT_DELETED_SUCCESSFULLY = "Comment deleted successfully",
+}

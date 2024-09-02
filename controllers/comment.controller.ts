@@ -7,14 +7,25 @@ import {
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUND } from "http-status-codes";
 import { Request, Response } from "express";
 import { CustomRequest, User } from "../types/CustomRequest.ts";
+import { ERROR_MESSAGES } from "../utils/messages.ts";
+
+interface Comment {
+  id: number;
+  title: string;
+  content: string;
+  PostId: number;
+  ParentId?: number;
+  UserId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // Define interfaces for service results
 interface CommentResult {
   success: boolean;
   message?: string;
-  comment?: object; // Replace `object` with your actual Comment type
+  comment?: Comment;
 }
-
 
 const createComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { title = "reply", content, PostId, ParentId } = req.body;
@@ -27,7 +38,7 @@ const createComment = async (req: CustomRequest, res: Response): Promise<Respons
     }
     return res.status(CREATED).json(result.comment);
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -39,10 +50,9 @@ const getCommentsByPostId = async (req: Request, res: Response): Promise<Respons
     if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
     return res.status(OK).json(result.data);
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
-
 
 const updateComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
@@ -57,7 +67,7 @@ const updateComment = async (req: CustomRequest, res: Response): Promise<Respons
     }
     return res.status(OK).json(result.comment);
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -73,9 +83,8 @@ const deleteComment = async (req: CustomRequest, res: Response): Promise<Respons
     }
     return res.status(OK).json({ message: result.message });
   } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
-
 
 export { createComment, getCommentsByPostId, updateComment, deleteComment};

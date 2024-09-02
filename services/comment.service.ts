@@ -1,8 +1,49 @@
 import Comment from "../sequelize/models/comment.model.ts";
 import Post from "../sequelize/models/post.model.ts";
+import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
 
-//for handling reply to comments
-const getCommentDepth = async (commentId : number) : Promise<number> => {
+// TypeScript interface for comment data
+interface CommentData {
+  id: number;
+  title: string;
+  content: string;
+  UserId: number;
+  PostId: number;
+  ParentId: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  subComments: CommentData[];
+}
+
+interface Comment {
+  id: number;
+  title: string;
+  content: string;
+  PostId: number;
+  ParentId?: number;
+  UserId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Response type for creating and updating comments
+interface CommentResponse {
+  success: boolean;
+  comment?: Comment;
+  message?: string;
+}
+
+// Response type for getting comments by post ID
+interface CommentsResult {
+  success: boolean;
+  data?: {
+    comments: CommentData[];
+  };
+  message?: string;
+}
+
+// Function to get the depth of a comment thread
+const getCommentDepth = async (commentId: number): Promise<number> => {
   let depth = 0;
   let currentCommentId = commentId;
 
@@ -19,10 +60,16 @@ const getCommentDepth = async (commentId : number) : Promise<number> => {
 };
 
 // Create a new comment
-const createComment = async (title : string, content : string, PostId : number, ParentId : number | null | undefined, UserId: number) => {
+const createComment = async (
+  title: string,
+  content: string,
+  PostId: number,
+  ParentId: number | null | undefined,
+  UserId: number
+) : Promise<CommentResponse> => {
   const post = await Post.findByPk(PostId);
   if (!post) {
-    return { success: false, message: "Post not Found" };
+    return { success: false, message: CommentStatus.POST_NOT_FOUND };
   }
 
   if (ParentId) {
@@ -30,13 +77,13 @@ const createComment = async (title : string, content : string, PostId : number, 
     if (parentComment && parentComment.PostId !== PostId) {
       return {
         success: false,
-        message: `This comment is not on post ${PostId}`,
+        message: `${CommentStatus.COMMENT_NOT_ON_POST} ${PostId}`,
       };
     }
     if (!parentComment) {
       return {
         success: false,
-        message: "You can't reply to a non-existing comment",
+        message: CommentStatus.CANNOT_REPLY_TO_NON_EXISTING_COMMENT,
       };
     }
     // Calculate the depth of the comment thread
@@ -56,69 +103,61 @@ const createComment = async (title : string, content : string, PostId : number, 
   return { success: true, comment: comment };
 };
 
-
-interface CommentData {
-  id: number;
-  title: string;
-  content: string;
-  UserId: number;
-  PostId: number;
-  ParentId: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  subComments: CommentData[];
-}
-// Build comment tree for nested comments
-const buildCommentTree = (comments: any[]): CommentData[] => {
+// Build a comment tree for nested comments
+const buildCommentTree = (comments: Comment[]): CommentData[] => {
   const commentMap: { [key: number]: CommentData } = {};
   const rootComments: CommentData[] = [];
+
   // Create a map for all comments
   comments.forEach((comment) => {
-    commentMap[comment.dataValues.id] = { ...comment.dataValues, subComments: [] };
+    //@ts-ignore
+    commentMap[comment.id] = { ...comment.dataValues, subComments: [] };
   });
 
   // Link child comments to their parent comments
   comments.forEach((comment) => {
-    if (comment.dataValues.ParentId) {
-      const parentComment = commentMap[comment.dataValues.ParentId];
+    if (comment.ParentId) {
+      const parentComment = commentMap[comment.ParentId];
       if (parentComment) {
-        parentComment.subComments.push(commentMap[comment.dataValues.id]);
+        parentComment.subComments.push(commentMap[comment.id]);
       }
     } else {
       // Add root comments (comments without ParentId) to rootComments array
-      rootComments.push(commentMap[comment.dataValues.id]);
+      rootComments.push(commentMap[comment.id]);
     }
   });
 
   return rootComments;
 };
+
 // Get comments by post ID with optional pagination
-const getCommentsByPostId = async (post_id : number) => {
+const getCommentsByPostId = async (post_id: number) : Promise<CommentsResult> => {
   const post = await Post.findByPk(post_id);
   if (!post) {
-    return { success: false, message: "Post not Found" };
+    return { success: false, message: CommentStatus.POST_NOT_FOUND };
   }
 
-  const comments = await Comment.findAndCountAll({
+  const comments = await Comment.findAll({
     where: { PostId: post_id },
   });
-  const commentsWithSubComments = buildCommentTree(comments.rows);
-  const data = {
-    comments: commentsWithSubComments,
-  };
-  return { success: true, data: data };
+  const commentsWithSubComments = buildCommentTree(comments);
+  return { success: true, data: { comments: commentsWithSubComments } };
 };
 
-
 // Update a comment
-const updateComment = async (comment_id : number, title : string, content : string, UserId : number) => {
+const updateComment = async (
+  comment_id: number,
+  title: string,
+  content: string,
+  UserId: number
+) : Promise<CommentResponse> => {
   const comment = await Comment.findByPk(comment_id);
   if (!comment) {
-    return { success: false, message: "Comment not Found" };
+    return { success: false, message: CommentStatus.COMMENT_NOT_FOUND };
   }
 
   if (comment.UserId !== UserId) {
-    return { success: false, message: "ForBidden" };
+    return { success: false, message: ERROR_MESSAGES.FORBIDDEN };
   }
 
   comment.title = title || comment.title;
@@ -129,27 +168,28 @@ const updateComment = async (comment_id : number, title : string, content : stri
 };
 
 // Delete a comment
-const deleteComment = async (comment_id : number, UserId: number) => {
+const deleteComment = async (comment_id: number, UserId: number) : Promise<CommentResponse> => {
   const comment = await Comment.findByPk(comment_id);
   if (!comment) {
-    return { success: false, message: "Comment not Found" };
+    return { success: false, message: CommentStatus.COMMENT_NOT_FOUND };
   }
 
   if (comment.UserId !== UserId) {
-    return { success: false, message: "ForBidden" };
+    return { success: false, message: ERROR_MESSAGES.FORBIDDEN };
   }
 
   await comment.destroy();
-  return { success: true, message: "Comment deleted successfully" };
+  return { success: true, message: CommentStatus.COMMENT_DELETED_SUCCESSFULLY };
 };
 
-const getCommentsByPostIdData = async (PostId : number) => {
+// Get comments by post ID data (no pagination)
+const getCommentsByPostIdData = async (PostId: number) => {
   try {
     const comments = await Comment.findAll({ where: { PostId } });
     const rootComments = buildCommentTree(comments);
     return rootComments;
   } catch (error) {
-    throw new Error("Internal server error!");
+    throw new Error(ERROR_MESSAGES.INTERNAL_SERVER);
   }
 };
 
