@@ -29,7 +29,7 @@ const signUpUser = async (name : string, email : string, password : string) : Pr
     // Generate a token for the user
     const token = generateToken(user);
     return { success: true, token };
-  } catch (error) {
+  } catch (error : unknown) {
     return { success: false, message: AuthStatus.SIGN_UP_ERROR };
   }
 };
@@ -52,7 +52,7 @@ const signInUser = async (email : string, password : string) : Promise<AuthResul
     // Generate a token for the user
     const token = generateToken(user);
     return { success: true, token };
-  } catch (error) {
+  } catch (error : unknown) {
     return { success: false, message: AuthStatus.SIGN_IN_ERROR };
   }
 };
