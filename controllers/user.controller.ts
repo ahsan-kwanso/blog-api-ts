@@ -6,6 +6,7 @@ import {
 } from "../services/user.service.ts";
 import { INTERNAL_SERVER_ERROR, OK, NOT_FOUND } from "http-status-codes";
 import { CustomRequest } from "../types/CustomRequest.ts";
+import { ERROR_MESSAGES } from "../utils/messages.ts";
 
 // Define interface for service results
 interface UserResult {
@@ -31,8 +32,8 @@ const getUser = async (req: CustomRequest, res: Response): Promise<Response> => 
       return res.status(NOT_FOUND).json({ message: result.message });
     }
     return res.status(OK).json({ user: result.user });
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+  } catch (error : unknown) {
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -44,9 +45,8 @@ const getAllUsers = async (req: Request, res: Response): Promise<Response> => {
       return res.status(INTERNAL_SERVER_ERROR).json({ message: "" });
     }
     return res.status(OK).json({ users: result.users });
-  } catch (error) {
-    console.error("Error fetching all users:", error);
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+  } catch (error : unknown) {
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
@@ -59,8 +59,8 @@ const getCurrentUser = async (req: CustomRequest, res: Response): Promise<Respon
       return res.status(NOT_FOUND).json({ message: result.message }); // Not found
     }
     return res.status(OK).json({ user: result.user }); // Success
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" }); // Internal error
+  } catch (error : unknown) {
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER }); // Internal error
   }
 };
 
