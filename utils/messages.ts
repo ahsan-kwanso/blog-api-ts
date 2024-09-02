@@ -23,3 +23,8 @@ export enum PostStatus {
     POST_NOT_FOUND = "Post not Found",
     POST_DELETED_SUCCESSFULLY = "Post deleted successfully",
 }
+
+export enum TokenValidation {
+    ACCESS_DENIED = "Access Denied! You are not authenticated",
+    INVALID_TOKEN = "Token is not valid",
+}

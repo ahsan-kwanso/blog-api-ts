@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { JWT_SECRET } from "../utils/settings.ts";
 import { User } from "../types/CustomRequest.ts";
 import { CustomRequest } from "../types/CustomRequest.ts";
+import { TokenValidation } from "../utils/messages.ts";
 
 
 export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -11,7 +12,7 @@ export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFun
   
   if (!token) {
     return res.status(UNAUTHORIZED).json({
-      message: "Access Denied! You are not authenticated",
+      message: TokenValidation.ACCESS_DENIED,
     });
   }
 
@@ -21,7 +22,7 @@ export const authenticateJWT = (req: CustomRequest, res: Response, next: NextFun
     next();
   } catch (ex) {
     return res.status(FORBIDDEN).json({
-      message: "Token is not valid",
+      message: TokenValidation.INVALID_TOKEN,
     });
   }
 };
