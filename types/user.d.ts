@@ -13,3 +13,19 @@ export interface UserCreationAttributes
   extends Optional<UserAttributes, "id" | "name"> {}
 
 export type UserInstance = data<UserAttributes, UserCreationAttributes>;
+
+
+interface AuthResult {
+  success: boolean;
+  message?: string;
+  token?: string;
+}
+
+interface SignInRequest {
+  email: string;
+  password: string;
+}
+
+interface SignUpRequest extends SignInRequest {
+  name: string;
+}

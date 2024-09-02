@@ -1,13 +1,8 @@
 import bcrypt from "bcryptjs";
 import User from "../sequelize/models/user.model.ts";
 import { generateToken } from "../utils/jwt.ts";
-import { ERROR_MESSAGES, AuthStatus } from "../utils/messages.ts";
-
-interface AuthResult {
-  success: boolean;
-  message?: string;
-  token?: string;
-}
+import { AuthStatus } from "../utils/messages.ts";
+import { AuthResult } from "../types/user";
 
 // Function to handle user signup
 const signUpUser = async (name : string, email : string, password : string) : Promise<AuthResult> => {
