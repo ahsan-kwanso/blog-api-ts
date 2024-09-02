@@ -7,19 +7,7 @@ import {
 import { INTERNAL_SERVER_ERROR, OK, NOT_FOUND } from "http-status-codes";
 import { CustomRequest } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES } from "../utils/messages.ts";
-
-// Define interface for service results
-interface UserResult {
-  success: boolean;
-  message?: string;
-  user?: object; // Replace `object` with a specific user type if available
-}
-
-interface UsersResult {
-  success: boolean;
-  message?: string;
-  users?: object[]; // Replace `object` with a specific user type if available
-}
+import { UserResult, UsersResult } from "../types/user";
 
 // Controller function to get a single user by ID
 const getUser = async (req: CustomRequest, res: Response): Promise<Response> => {

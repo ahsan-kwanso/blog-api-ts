@@ -29,3 +29,15 @@ interface SignInRequest {
 interface SignUpRequest extends SignInRequest {
   name: string;
 }
+
+// Define interfaces for service results
+interface UserResult {
+  success: boolean;
+  message?: string;
+  user?: UserAttributes;
+}
+
+interface UsersResult {
+  success: boolean;
+  users?:  UserAttributes[];
+}
