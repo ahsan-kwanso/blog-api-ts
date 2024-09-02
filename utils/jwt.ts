@@ -2,7 +2,10 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "./settings.ts"
 import { User } from "../types/CustomRequest.ts";
 
-export const generateToken = (user: User) => {
+export const generateToken = (user: User) : string => {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not defined");
+  }
   const payload = {
     id: user.id,
     name: user.name,

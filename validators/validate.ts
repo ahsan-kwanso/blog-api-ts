@@ -1,8 +1,8 @@
 import { validationResult, ValidationChain } from "express-validator";
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { BAD_REQUEST } from "http-status-codes";
 
-export const validate = (validationRules : ValidationChain[]) => {
+export const validate = (validationRules : ValidationChain[]) : RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction) => {
     await Promise.all(validationRules.map((rule) => rule.run(req)));
 
