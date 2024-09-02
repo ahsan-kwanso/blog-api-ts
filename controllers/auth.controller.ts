@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { signUpUser, signInUser } from "../services/auth.service.ts";
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK } from "http-status-codes";
+import { ERROR_MESSAGES } from "../utils/messages.ts";
 
 interface AuthResult {
   success: boolean;
@@ -8,7 +9,18 @@ interface AuthResult {
   token?: string;
 }
 
-const signUp = async (req: Request, res: Response): Promise<Response> => {
+interface SignUpRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface SignInRequest {
+  email: string;
+  password: string;
+}
+
+const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response): Promise<Response> => {
   const { name, email, password } = req.body;
 
   try {
@@ -19,12 +31,15 @@ const signUp = async (req: Request, res: Response): Promise<Response> => {
     }
 
     return res.status(CREATED).json({ token: result.token });
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+  } catch (error : unknown) {
+    if (error instanceof Error) {
+      return res.status(INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
-const signIn = async (req: Request, res: Response): Promise<Response> => {
+const signIn = async (req: Request<{}, {}, SignInRequest>, res: Response): Promise<Response> => {
   const { email, password } = req.body;
 
   try {
@@ -35,8 +50,11 @@ const signIn = async (req: Request, res: Response): Promise<Response> => {
     }
 
     return res.status(OK).json({ token: result.token });
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
+  } catch (error : unknown) {
+    if (error instanceof Error) {
+      return res.status(INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
