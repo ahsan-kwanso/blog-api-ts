@@ -1,10 +1,8 @@
 import {
   createComment as createCommentService,
   getCommentsByPostId as getCommentsByPostIdService,
-  getCommentById as getCommentByIdService,
   updateComment as updateCommentService,
   deleteComment as deleteCommentService,
-  searchCommentsByTitleOrContent as searchCommentsByTitleOrContentService,
 } from "../services/comment.service.ts";
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUND } from "http-status-codes";
 import { Request, Response } from "express";
@@ -45,17 +43,6 @@ const getCommentsByPostId = async (req: Request, res: Response): Promise<Respons
   }
 };
 
-const getCommentById = async (req: Request, res: Response): Promise<Response> => {
-  const { comment_id } = req.params;
-
-  try {
-    const result: CommentResult = await getCommentByIdService(parseInt(comment_id));
-    if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
-    return res.status(OK).json(result.comment);
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
-  }
-};
 
 const updateComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
@@ -90,14 +77,5 @@ const deleteComment = async (req: CustomRequest, res: Response): Promise<Respons
   }
 };
 
-const searchCommentsByTitleOrContent = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    const result = await searchCommentsByTitleOrContentService(req);
-    if (!result.success) return res.status(BAD_REQUEST).json({ message: result.message });
-    return res.status(OK).json(result.data);
-  } catch (error) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: "Internal server error" });
-  }
-};
 
-export { createComment, getCommentsByPostId, getCommentById, updateComment, deleteComment, searchCommentsByTitleOrContent };
+export { createComment, getCommentsByPostId, updateComment, deleteComment};

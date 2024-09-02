@@ -1,12 +1,8 @@
 import Comment from "../sequelize/models/comment.model.ts";
 import Post from "../sequelize/models/post.model.ts";
-import { Request } from "express";
-import { Op } from 'sequelize';
-import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
-import paginationConfig from "../utils/pagination.config.ts";
 
 //for handling reply to comments
-const getCommentDepth = async (commentId : number) => {
+const getCommentDepth = async (commentId : number) : Promise<number> => {
   let depth = 0;
   let currentCommentId = commentId;
 
@@ -113,14 +109,6 @@ const getCommentsByPostId = async (post_id : number) => {
   return { success: true, data: data };
 };
 
-// Get a single comment by ID
-const getCommentById = async (comment_id : number) => {
-  const comment = await Comment.findByPk(comment_id);
-  if (!comment) {
-    return { success: false, message: "Comment not Found" };
-  }
-  return { success: true, comment: comment };
-};
 
 // Update a comment
 const updateComment = async (comment_id : number, title : string, content : string, UserId : number) => {
@@ -155,47 +143,6 @@ const deleteComment = async (comment_id : number, UserId: number) => {
   return { success: true, message: "Comment deleted successfully" };
 };
 
-// Search comments by title or content
-const searchCommentsByTitleOrContent = async (req : Request) => {
-  const { title = "", content = "", page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
-
-  const pagination = validatePagination(page as string, limit as string);
-  if (pagination.error) {
-    return { success: false, message: pagination.error };
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
-
-  if (!title && !content) {
-    return {
-      success: false,
-      message: "Title or content query parameter is required",
-    };
-  }
-
-  const comments = await Comment.findAndCountAll({
-    where: {
-      [Op.or]: [
-        { title: { [Op.iLike]: `%${title}%` } },
-        { content: { [Op.iLike]: `%${content}%` } },
-      ],
-    },
-    limit: pagination.pageSize,
-    offset: (pageNumber - 1) * pageSize,
-  });
-
-  const totalPages = Math.ceil(comments.count / pageSize);
-  const nextPage = pageNumber < totalPages ? pageNumber + 1 : null;
-
-  const data = {
-    total: comments.count,
-    page: pageNumber,
-    pageSize: pageSize,
-    nextPageUrl: generateNextPageUrl(nextPage, pageSize, req),
-    comments: comments.rows,
-  };
-  return { success: true, data: data };
-};
-
 const getCommentsByPostIdData = async (PostId : number) => {
   try {
     const comments = await Comment.findAll({ where: { PostId } });
@@ -209,9 +156,7 @@ const getCommentsByPostIdData = async (PostId : number) => {
 export {
   createComment,
   getCommentsByPostId,
-  getCommentById,
   updateComment,
   deleteComment,
-  searchCommentsByTitleOrContent,
   getCommentsByPostIdData,
 };

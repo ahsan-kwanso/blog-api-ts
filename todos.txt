@@ -11,5 +11,6 @@ further add return types
 modify the connection
 modify the models accordingly
 test your application as well
+then use eslint to configure more errors
 
 Now I will keep only those requests that I am actually using on frontend, or keep all for practise purposes
