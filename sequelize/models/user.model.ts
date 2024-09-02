@@ -1,8 +1,9 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/sequelize.ts";
 import bcrypt from "bcrypt";
+import { UserInstance } from "../../types/user";
 
-const User = sequelize.define(
+const User: UserInstance = sequelize.define<UserInstance>(
   "Users",
   {
     id: {

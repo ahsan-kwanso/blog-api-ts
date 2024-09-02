@@ -8,7 +8,7 @@ const env = NODE_ENV || "development";
 //@ts-ignore
 const config = configFile[env];
 
-let sequelize : any;
+let sequelize : Sequelize;
 if (env === "production") {
   sequelize = new Sequelize(config.production_db_url, {
     dialect: config.dialect,

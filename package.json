@@ -5,15 +5,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "dev": "nodemon --watch './**/*.ts' --exec 'NODE_OPTIONS=--loader=ts-node/esm ts-node -r tsconfig-paths/register' index.ts",
-  "start": "node index.js",
-  "db:migrate": "npx sequelize-cli db:migrate --config sequelize/config/db.config.js"
-},
-
+    "dev": "nodemon --watch './**/*.ts' --exec 'NODE_OPTIONS=--loader=ts-node/esm ts-node -r tsconfig-paths/register' index.ts",
+    "start": "node index.js",
+    "db:migrate": "npx sequelize-cli db:migrate --config sequelize/config/db.config.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sequelize/core": "^7.0.0-alpha.37",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
