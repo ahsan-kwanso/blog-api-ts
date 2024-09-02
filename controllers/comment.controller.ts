@@ -7,7 +7,7 @@ import {
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUND } from "http-status-codes";
 import { Request, Response } from "express";
 import { CustomRequest, User } from "../types/CustomRequest.ts";
-import { ERROR_MESSAGES } from "../utils/messages.ts";
+import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
 
 interface Comment {
   id: number;
@@ -33,7 +33,7 @@ const createComment = async (req: CustomRequest, res: Response): Promise<Respons
   try {
     const result: CommentResult = await createCommentService(title, content, PostId, ParentId, id);
     if (!result.success) {
-      if (result.message === "Post not Found") return res.status(NOT_FOUND).json({ message: result.message });
+      if (result.message === CommentStatus.POST_NOT_FOUND) return res.status(NOT_FOUND).json({ message: result.message });
       return res.status(BAD_REQUEST).json({ message: result.message });
     }
     return res.status(CREATED).json(result.comment);
@@ -62,7 +62,7 @@ const updateComment = async (req: CustomRequest, res: Response): Promise<Respons
   try {
     const result: CommentResult = await updateCommentService(parseInt(comment_id), title, content, id);
     if (!result.success) {
-      if (result.message === "ForBidden") return res.status(UNAUTHORIZED).json({ message: result.message });
+      if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
       return res.status(NOT_FOUND).json({ message: result.message });
     }
     return res.status(OK).json(result.comment);
@@ -78,7 +78,7 @@ const deleteComment = async (req: CustomRequest, res: Response): Promise<Respons
   try {
     const result: CommentResult = await deleteCommentService(parseInt(comment_id), id);
     if (!result.success) {
-      if (result.message === "ForBidden") return res.status(UNAUTHORIZED).json({ message: result.message });
+      if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
       return res.status(NOT_FOUND).json({ message: result.message });
     }
     return res.status(OK).json({ message: result.message });
