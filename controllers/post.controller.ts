@@ -12,23 +12,7 @@ import {
 import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
 import { CustomRequest } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES } from "../utils/messages.ts";
-
-// Define interfaces for service results
-interface PostResult {
-  success: boolean;
-  message?: string;
-  post?: object; // Replace `object` with your actual Post type
-}
-
-interface PostsResult {
-  success?: boolean; // Made optional
-  message?: string; // Made optional
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  nextPage?: string | null;
-  posts?: object[]; // Replace `object` with your actual Post type
-}
+import { PostResult, PostsResult } from "../types/post";
 
 // Create a new post
 const createPost = async (req: CustomRequest, res: Response): Promise<Response> => {

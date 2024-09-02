@@ -6,43 +6,7 @@ import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
 import { ERROR_MESSAGES, PostStatus } from "../utils/messages.ts";
-
-interface PostAttributes {
-  id: number;
-  title: string;
-  content: string;
-  UserId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface PostWithUser extends PostAttributes {
-  User?: {
-    name: string;
-  };
-}
-
-interface PostResponse {
-  id: number;
-  author?: string;
-  title: string;
-  content: string;
-  date: string;
-}
-
-interface PaginatedPostsResponse {
-  success? : boolean;
-  posts: PostResponse[];
-  total: number;
-  page?: number;
-  pageSize?: number;
-  nextPage: string | null;
-}
-interface ErrorResponse {
-  success: false;
-  message: string;
-}
-
+import { PostAttributes, PaginatedPostsResponse, ErrorResponse, PostWithUser, PostResponse } from "../types/post";
 
 const createPost = async (title: string, content: string, userId: number): Promise<PostAttributes> => {
   const post = await Post.create({ title, content, UserId: userId });
