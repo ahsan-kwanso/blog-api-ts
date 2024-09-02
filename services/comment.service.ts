@@ -1,46 +1,7 @@
 import Comment from "../sequelize/models/comment.model.ts";
 import Post from "../sequelize/models/post.model.ts";
 import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
-
-// TypeScript interface for comment data
-interface CommentData {
-  id: number;
-  title: string;
-  content: string;
-  UserId: number;
-  PostId: number;
-  ParentId: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  subComments: CommentData[];
-}
-
-interface Comment {
-  id: number;
-  title: string;
-  content: string;
-  PostId: number;
-  ParentId?: number;
-  UserId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Response type for creating and updating comments
-interface CommentResponse {
-  success: boolean;
-  comment?: Comment;
-  message?: string;
-}
-
-// Response type for getting comments by post ID
-interface CommentsResult {
-  success: boolean;
-  data?: {
-    comments: CommentData[];
-  };
-  message?: string;
-}
+import { CommentData, CommentsResult, CommentResponse, Comment as CommentModel } from "../types/comment";
 
 // Function to get the depth of a comment thread
 const getCommentDepth = async (commentId: number): Promise<number> => {
@@ -104,7 +65,7 @@ const createComment = async (
 };
 
 // Build a comment tree for nested comments
-const buildCommentTree = (comments: Comment[]): CommentData[] => {
+const buildCommentTree = (comments: CommentModel[]): CommentData[] => {
   const commentMap: { [key: number]: CommentData } = {};
   const rootComments: CommentData[] = [];
 

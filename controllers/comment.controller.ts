@@ -8,30 +8,13 @@ import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUN
 import { Request, Response } from "express";
 import { CustomRequest, User } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
-
-interface Comment {
-  id: number;
-  title: string;
-  content: string;
-  PostId: number;
-  ParentId?: number;
-  UserId: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Define interfaces for service results
-interface CommentResult {
-  success: boolean;
-  message?: string;
-  comment?: Comment;
-}
+import { CommentResponse } from "../types/comment";
 
 const createComment = async (req: CustomRequest, res: Response): Promise<Response> => {
   const { title = "reply", content, PostId, ParentId } = req.body;
   const { id } = req.user as User; // Extract UserId from authenticated user
   try {
-    const result: CommentResult = await createCommentService(title, content, PostId, ParentId, id);
+    const result: CommentResponse = await createCommentService(title, content, PostId, ParentId, id);
     if (!result.success) {
       if (result.message === CommentStatus.POST_NOT_FOUND) return res.status(NOT_FOUND).json({ message: result.message });
       return res.status(BAD_REQUEST).json({ message: result.message });
@@ -60,7 +43,7 @@ const updateComment = async (req: CustomRequest, res: Response): Promise<Respons
   const { id } = req.user as User;
 
   try {
-    const result: CommentResult = await updateCommentService(parseInt(comment_id), title, content, id);
+    const result: CommentResponse= await updateCommentService(parseInt(comment_id), title, content, id);
     if (!result.success) {
       if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
       return res.status(NOT_FOUND).json({ message: result.message });
@@ -76,7 +59,7 @@ const deleteComment = async (req: CustomRequest, res: Response): Promise<Respons
   const { id } = req.user as User;
 
   try {
-    const result: CommentResult = await deleteCommentService(parseInt(comment_id), id);
+    const result: CommentResponse = await deleteCommentService(parseInt(comment_id), id);
     if (!result.success) {
       if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
       return res.status(NOT_FOUND).json({ message: result.message });
