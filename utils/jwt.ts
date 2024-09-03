@@ -11,6 +11,6 @@ export const generateToken = (user: User) : string => {
     name: user.name,
     email: user.email,
   };
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: "3h" });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: "24h" });
   //The ! operator tells TypeScript that you are confident JWT_SECRET is not undefined.
 };
