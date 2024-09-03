@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import { authenticateJWT } from "../middlewares/authmiddleware.ts";
 import {
   createComment,
@@ -15,7 +15,7 @@ import {
 } from "../validators/comment.validator.ts";
 import { validate } from "../validators/validate.ts";
 
-const router = express.Router();
+const router : Router = express.Router();
 
 router.post("/", authenticateJWT, validate(createCommentValidationRules), createComment);
 router.get("/post/:post_id", authenticateJWT, validate(getCommentByPostIdValidationRules), getCommentsByPostId);

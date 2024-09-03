@@ -1,9 +1,9 @@
-import express from "express";
+import express, {Express} from "express";
 import router from "./routes/index.ts";
 import cors from "cors";
 import { PORT } from "./utils/settings.ts";
 
-const app = express();
+const app : Express = express();
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors());
 app.use(router);

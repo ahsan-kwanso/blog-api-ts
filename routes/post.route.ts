@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 import { authenticateJWT } from "../middlewares/authmiddleware.ts";
 import {
   createPost,
@@ -18,7 +18,7 @@ import {
 
 import { validate } from "../validators/validate.ts";
 
-const router = express.Router();
+const router : Router = express.Router();
 
 router.post("/", authenticateJWT, validate(createPostValidationRules), createPost);
 router.get("/", getPosts); //removed jwt authentication
