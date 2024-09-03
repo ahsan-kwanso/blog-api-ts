@@ -13,6 +13,7 @@ const createPost = async (title: string, content: string, userId: number): Promi
   return post;
 };
 
+//
 const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
   const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, filter } = req.query;
   // Validate pagination parameters

@@ -12,7 +12,7 @@ const updatePostValidationRules = [
   body("content").optional().notEmpty().withMessage("Content cannot be empty"),
 ];
 
-// Delete Post Validation Rules
+// Delete Post Validation Rules , +ve int check
 const deletePostValidationRules = [param("post_id").isInt().withMessage("Valid post ID is required")];
 
 const getPostByIdValidationRules = [param("post_id").isInt().withMessage("Valid post ID is required")];

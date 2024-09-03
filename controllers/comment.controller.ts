@@ -6,13 +6,13 @@ import {
 } from "../services/comment.service.ts";
 import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, NOT_FOUND } from "http-status-codes";
 import { Request, Response } from "express";
-import { CustomRequest, User } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
 import { CommentResponse } from "../types/comment";
+import { Payload } from "../types/module";
 
-const createComment = async (req: CustomRequest, res: Response): Promise<Response> => {
+const createComment = async (req: Request, res: Response): Promise<Response> => {
   const { title = "reply", content, PostId, ParentId } = req.body;
-  const { id } = req.user as User; // Extract UserId from authenticated user
+  const { id } = req.user as Payload; // Extract UserId from authenticated user
   try {
     const result: CommentResponse = await createCommentService(title, content, PostId, ParentId, id);
     if (!result.success) {
@@ -37,10 +37,10 @@ const getCommentsByPostId = async (req: Request, res: Response): Promise<Respons
   }
 };
 
-const updateComment = async (req: CustomRequest, res: Response): Promise<Response> => {
+const updateComment = async (req: Request, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
   const { title, content } = req.body;
-  const { id } = req.user as User;
+  const { id } = req.user as Payload;
 
   try {
     const result: CommentResponse= await updateCommentService(parseInt(comment_id), title, content, id);
@@ -54,9 +54,9 @@ const updateComment = async (req: CustomRequest, res: Response): Promise<Respons
   }
 };
 
-const deleteComment = async (req: CustomRequest, res: Response): Promise<Response> => {
+const deleteComment = async (req: Request, res: Response): Promise<Response> => {
   const { comment_id } = req.params;
-  const { id } = req.user as User;
+  const { id } = req.user as Payload;
 
   try {
     const result: CommentResponse = await deleteCommentService(parseInt(comment_id), id);

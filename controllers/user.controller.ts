@@ -5,12 +5,11 @@ import {
   getCurrentUser as getCurrentUserService,
 } from "../services/user.service.ts";
 import { INTERNAL_SERVER_ERROR, OK, NOT_FOUND } from "http-status-codes";
-import { CustomRequest } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES } from "../utils/messages.ts";
 import { UserResult, UsersResult } from "../types/user";
 
 // Controller function to get a single user by ID
-const getUser = async (req: CustomRequest, res: Response): Promise<Response> => {
+const getUser = async (req: Request, res: Response): Promise<Response> => {
   const { user_id } = req.params; // Extract userId from route parameters
   const { id } = req.user as { id: number }; // Assuming `req.user` has an `id` field
 
@@ -39,7 +38,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // Controller function to get the current user
-const getCurrentUser = async (req: CustomRequest, res: Response): Promise<Response> => {
+const getCurrentUser = async (req: Request, res: Response): Promise<Response> => {
   const userId = (req.user as { id: number }).id; // Extract user ID from req.user
   try {
     const result: UserResult = await getCurrentUserService(userId); // Fetch user info

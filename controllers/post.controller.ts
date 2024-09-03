@@ -10,12 +10,11 @@ import {
   searchUserPostsByTitle as searchUserPostsByTitleService,
 } from "../services/post.service.ts";
 import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
-import { CustomRequest } from "../types/CustomRequest.ts";
 import { ERROR_MESSAGES } from "../utils/messages.ts";
 import { PostResult, PostsResult } from "../types/post";
 
 // Create a new post
-const createPost = async (req: CustomRequest, res: Response): Promise<Response> => {
+const createPost = async (req: Request, res: Response): Promise<Response> => {
   const { title, content } = req.body;
   const { id } = req.user as { id: number }; // Assuming `req.user` has an `id` field
 
@@ -67,7 +66,7 @@ const getPostById = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // Update a post by ID
-const updatePost = async (req: CustomRequest, res: Response): Promise<Response> => {
+const updatePost = async (req: Request, res: Response): Promise<Response> => {
   const { post_id } = req.params;
   const { title, content } = req.body;
   const { id } = req.user as { id: number };
@@ -85,7 +84,7 @@ const updatePost = async (req: CustomRequest, res: Response): Promise<Response> 
 };
 
 // Delete a post by ID
-const deletePost = async (req: CustomRequest, res: Response): Promise<Response> => {
+const deletePost = async (req: Request, res: Response): Promise<Response> => {
   const { post_id } = req.params;
   const { id } = req.user as { id: number };
 
@@ -104,7 +103,7 @@ const deletePost = async (req: CustomRequest, res: Response): Promise<Response> 
 // Search posts by title with optional filtering
 const getPostsByTitle = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { filter } = req.query;
+    const { filter } = req.query; // make enum
     let data: PostsResult;
 
     if (filter === "my-posts" && req.query.userId) {

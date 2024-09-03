@@ -25,7 +25,7 @@ const createComment = async (
   title: string,
   content: string,
   PostId: number,
-  ParentId: number | null | undefined,
+  ParentId: number | null | undefined, //don't use
   UserId: number
 ) : Promise<CommentResponse> => {
   const post = await Post.findByPk(PostId);

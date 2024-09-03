@@ -4,6 +4,8 @@ import { BAD_REQUEST, CREATED, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK } from "h
 import { ERROR_MESSAGES } from "../utils/messages.ts";
 import { SignUpRequest, AuthResult, SignInRequest } from "../types/user";
 
+//modify request make a generic for request pass body and param 
+//declare type for response e.g message token status
 const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response): Promise<Response> => {
   const { name, email, password } = req.body;
 
@@ -17,6 +19,7 @@ const signUp = async (req: Request<{}, {}, SignUpRequest>, res: Response): Promi
     return res.status(CREATED).json({ token: result.token });
   } catch (error : unknown) {
     if (error instanceof Error) {
+      //Error status update
       return res.status(INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });

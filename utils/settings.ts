@@ -17,5 +17,7 @@ export const DATABASE_URL = process.env.DATABASE_URL;
 export const DB_DIALECT_PROD = process.env.DB_DIALECT_PROD || "postgres";
 
 export const NODE_ENV = process.env.NODE_ENV || "development";
-export const JWT_SECRET = process.env.JWT_SECRET;
+export const JWT_SECRET = process.env.JWT_SECRET || "3768&&*((";
 export const PORT = process.env.PORT || 3000;
+
+//make one object and add validations and declare types

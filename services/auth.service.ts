@@ -52,4 +52,6 @@ const signInUser = async (email : string, password : string) : Promise<AuthResul
   }
 };
 
+//error should be thrown in services as well make instance
+
 export { signInUser, signUpUser };
