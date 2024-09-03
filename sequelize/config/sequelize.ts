@@ -1,18 +1,39 @@
 import dotenv from "dotenv";
-import { Sequelize } from "sequelize";
+import { Sequelize, Dialect } from "sequelize";
 import configFile from "./db.config.ts";
 import { NODE_ENV } from "../../utils/settings.ts";
 dotenv.config();
 
-const env = NODE_ENV || "development";
-//@ts-ignore
-const config = configFile[env];
+type DevelopmentOrTestConfig = {
+  username: string;
+  password: string;
+  database: string;
+  host: string;
+  dialect: Dialect;
+};
 
-let sequelize : Sequelize;
+type ProductionConfig = {
+  production_db_url: string;
+  dialect: Dialect;
+};
+
+type Config = {
+  development: DevelopmentOrTestConfig;
+  test: DevelopmentOrTestConfig;
+  production: ProductionConfig;
+};
+
+const env = (NODE_ENV as keyof Config) || "development";
+
+const configFileTyped: Config = configFile as Config;
+const config = configFileTyped[env];
+
+let sequelize: Sequelize;
 if (env === "production") {
-  sequelize = new Sequelize(config.production_db_url, {
-    dialect: config.dialect,
-    protocol: config.dialect,
+  const productionConfig = config as ProductionConfig;
+  sequelize = new Sequelize(productionConfig.production_db_url, {
+    dialect: productionConfig.dialect,
+    protocol: productionConfig.dialect,
     dialectOptions: {
       ssl: {
         require: true,
@@ -21,9 +42,11 @@ if (env === "production") {
     },
   });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, {
-    host: config.host,
-    dialect: config.dialect,
+  const devTestConfig = config as DevelopmentOrTestConfig;
+  sequelize = new Sequelize(devTestConfig.database, devTestConfig.username, devTestConfig.password, {
+    host: devTestConfig.host,
+    dialect: devTestConfig.dialect,
   });
 }
+
 export { sequelize };

@@ -4,6 +4,13 @@ import User from "./user.model.ts";
 import Post from "./post.model.ts";
 import Comment from "./comment.model.ts";
 
+
+enum DbModelNames {
+  User = "User",
+  Post = "Post",
+  Comment = "Comment",
+}
+
 interface IDb {
   User: typeof User;
   Post: typeof Post;
@@ -17,13 +24,13 @@ db.User = User;
 db.Post = Post;
 db.Comment = Comment;
 
-Object.keys(db).forEach((modelName) => {
-  //@ts-ignore
-  if (db[modelName].associate) {
-    //@ts-ignore
-    db[modelName].associate(db);
+(Object.keys(db) as Array<keyof typeof DbModelNames>).forEach((modelName) => {
+  const model = db[modelName as DbModelNames];
+  if (model?.associate) {
+    model.associate(db);
   }
 });
+
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
