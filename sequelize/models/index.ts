@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize";
 import User from "./user.model.ts";
 import Post from "./post.model.ts";
 import Comment from "./comment.model.ts";
+import { IDb } from "../../types/models";
 
 
 enum DbModelNames {
@@ -11,13 +12,6 @@ enum DbModelNames {
   Comment = "Comment",
 }
 
-interface IDb {
-  User: typeof User;
-  Post: typeof Post;
-  Comment: typeof Comment;
-  sequelize: Sequelize;
-  Sequelize: typeof Sequelize;
-}
 const db: IDb = {} as IDb;
 
 db.User = User;

@@ -1,6 +1,7 @@
 import { sequelize } from "../config/sequelize.ts";
 import { DataTypes } from "sequelize";
 import { CommentInstance } from "../../types/comment";
+import { IDb } from "../../types/models";
 
 const Comment : CommentInstance = sequelize.define<CommentInstance>("Comments", {
   id: {
@@ -42,8 +43,8 @@ const Comment : CommentInstance = sequelize.define<CommentInstance>("Comments", 
   },
 });
 
-//@ts-ignore
-Comment.associate = (models) => {
+
+Comment.associate = (models : IDb) => {
   Comment.belongsTo(models.User, {
     foreignKey: "UserId",
   });
