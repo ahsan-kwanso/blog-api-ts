@@ -15,29 +15,29 @@ export interface UserCreationAttributes
 export type UserInstance = data<UserAttributes, UserCreationAttributes>;
 
 
-interface AuthResult {
+export interface AuthResult {
   success: boolean;
   message?: string;
   token?: string;
 }
 
-interface SignInRequest {
+export interface SignInRequest {
   email: string;
   password: string;
 }
 
-interface SignUpRequest extends SignInRequest {
+export interface SignUpRequest extends SignInRequest {
   name: string;
 }
 
 // Define interfaces for service results
-interface UserResult {
+export interface UserResult {
   success: boolean;
   message?: string;
   user?: UserAttributes;
 }
 
-interface UsersResult {
+export interface UsersResult {
   success: boolean;
   users?:  UserAttributes[];
 }
