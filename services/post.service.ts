@@ -15,9 +15,11 @@ const createPost = async (title: string, content: string, userId: number): Promi
 
 //
 const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, filter } = req.query;
+  const { filter } = req.query;
+  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
+  const pagination = validatePagination(page, limit);
   if (pagination.error) {
     return { success: false, message: pagination.error };
   }
@@ -58,7 +60,9 @@ const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorRes
 };
 
 const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit } = req.query;
+  const { filter } = req.query;
+  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   const userId = req.query.userId as string;
 
   if (!userId) {
@@ -68,7 +72,7 @@ const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorR
   const numericUserId = Number(userId);
 
   // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
+  const pagination = validatePagination(page, limit);
   if (pagination.error) {
     return { success: false, message: pagination.error };
   }
@@ -149,10 +153,12 @@ const deletePost = async (postId: number, userId: number): Promise<{ success: bo
 };
 
 const searchPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
+  const { title } = req.query;
+  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
 
   // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
+  const pagination = validatePagination(page , limit );
   if (pagination.error) {
     return { success: false, message: pagination.error };
   }
@@ -196,11 +202,13 @@ const searchPostsByTitle = async (req : Request): Promise<ErrorResponse | Pagina
 };
 
 const searchUserPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
-  const { page = paginationConfig.defaultPage, limit = paginationConfig.defaultLimit, title } = req.query;
+  const { title } = req.query;
+  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   const userId = req.query.userId; // Extract UserId from query as sent from front end
   const numericUserId = Number(userId);
   // Validate pagination parameters
-  const pagination = validatePagination(page as string, limit as string);
+  const pagination = validatePagination(page, limit);
   if (pagination.error) {
     return { success: false, message: pagination.error };
   }

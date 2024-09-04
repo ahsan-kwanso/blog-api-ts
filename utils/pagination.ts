@@ -1,5 +1,6 @@
 import { Request } from "express-validator/lib/base";
 import { URL, URLSearchParams } from "url";
+import paginationConfig from "./pagination.config.ts";
 
 interface PaginationResult {
   pageNumber?: number;
@@ -8,18 +9,13 @@ interface PaginationResult {
 }
 
 //these should be int
-const validatePagination = (page: string | undefined, limit: string | undefined): PaginationResult => {
-  const pageNumber = parseInt(page || '', 10);
-  const pageSize = parseInt(limit || '', 10);
+const validatePagination = (page: number, limit: number): PaginationResult => {
+  const pageNumber = page || paginationConfig.defaultPage;
+  const pageSize = limit || paginationConfig.defaultLimit;
 
   //handle pagination in validators
   if (pageNumber <= 0 || pageSize <= 0) {
     return { error: "Page and limit must be positive integers" };
-  }
-
-  // Check if page and limit are numbers
-  if (isNaN(pageNumber) || isNaN(pageSize)) {
-    return { error: "Page and limit must be numbers" };
   }
 
   return { pageNumber, pageSize };
