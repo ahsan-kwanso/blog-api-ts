@@ -7,8 +7,7 @@ export interface PostAttributes {
   UserId: number;
 }
 
-export interface PostCreationAttributes
-  extends Optional<PostAttributes, "id" | "UserId"> {}
+export interface PostCreationAttributes extends Optional<PostAttributes, "id" | "UserId"> {}
 
 export type PostInstance = data<PostAttributes, PostCreationAttributes>;
 
@@ -66,4 +65,3 @@ interface PostsResult {
   nextPage?: string | null;
   posts?: object[]; // Use the Post type here
 }
-

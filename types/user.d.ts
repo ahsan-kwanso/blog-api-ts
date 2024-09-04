@@ -9,11 +9,9 @@ export interface UserAttributes {
 }
 
 // Interface for UserCreationAttributes, representing the attributes required to create a User
-export interface UserCreationAttributes
-  extends Optional<UserAttributes, "id" | "name"> {}
+export interface UserCreationAttributes extends Optional<UserAttributes, "id" | "name"> {}
 
 export type UserInstance = data<UserAttributes, UserCreationAttributes>;
-
 
 export interface AuthResult {
   success: boolean;
@@ -39,5 +37,5 @@ export interface UserResult {
 
 export interface UsersResult {
   success: boolean;
-  users?:  UserAttributes[];
+  users?: UserAttributes[];
 }
