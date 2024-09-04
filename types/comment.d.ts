@@ -9,14 +9,9 @@ export interface CommentAttributes {
   ParentId?: number | null;
 }
 
-export interface CommentCreationAttributes
-  extends Optional<CommentAttributes, "id" | "ParentId"> {}
+export interface CommentCreationAttributes extends Optional<CommentAttributes, "id" | "ParentId"> {}
 
-export type CommentInstance = data<
-  CommentAttributes,
-  CommentCreationAttributes
->;
-
+export type CommentInstance = data<CommentAttributes, CommentCreationAttributes>;
 
 // Base interface for comment data
 interface BaseCommentData {

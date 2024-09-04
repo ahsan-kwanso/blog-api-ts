@@ -25,27 +25,21 @@ const createComment = async (
   title: string,
   content: string,
   PostId: number,
-  ParentId: number | null | undefined, //don't use
+  ParentId: number | null,
   UserId: number
-) : Promise<CommentResponse> => {
+): Promise<CommentResponse> => {
   const post = await Post.findByPk(PostId);
   if (!post) {
-    return { success: false, message: CommentStatus.POST_NOT_FOUND };
+    throw new Error(CommentStatus.POST_NOT_FOUND);
   }
 
   if (ParentId) {
     const parentComment = await Comment.findByPk(ParentId);
-    if (parentComment && parentComment.PostId !== PostId) {
-      return {
-        success: false,
-        message: `${CommentStatus.COMMENT_NOT_ON_POST} ${PostId}`,
-      };
-    }
     if (!parentComment) {
-      return {
-        success: false,
-        message: CommentStatus.CANNOT_REPLY_TO_NON_EXISTING_COMMENT,
-      };
+      throw new Error(CommentStatus.CANNOT_REPLY_TO_NON_EXISTING_COMMENT);
+    }
+    if (parentComment.PostId !== PostId) {
+      throw new Error(`${CommentStatus.COMMENT_NOT_ON_POST} ${PostId}`);
     }
     // Calculate the depth of the comment thread
     const depth = await getCommentDepth(ParentId);
@@ -92,10 +86,10 @@ const buildCommentTree = (comments: CommentModel[]): CommentData[] => {
 };
 
 // Get comments by post ID with optional pagination
-const getCommentsByPostId = async (post_id: number) : Promise<CommentsResult> => {
+const getCommentsByPostId = async (post_id: number): Promise<CommentsResult> => {
   const post = await Post.findByPk(post_id);
   if (!post) {
-    return { success: false, message: CommentStatus.POST_NOT_FOUND };
+    throw new Error(CommentStatus.POST_NOT_FOUND);
   }
 
   const comments = await Comment.findAll({
@@ -106,19 +100,14 @@ const getCommentsByPostId = async (post_id: number) : Promise<CommentsResult> =>
 };
 
 // Update a comment
-const updateComment = async (
-  comment_id: number,
-  title: string,
-  content: string,
-  UserId: number
-) : Promise<CommentResponse> => {
+const updateComment = async (comment_id: number, title: string, content: string, UserId: number): Promise<CommentResponse> => {
   const comment = await Comment.findByPk(comment_id);
   if (!comment) {
-    return { success: false, message: CommentStatus.COMMENT_NOT_FOUND };
+    throw new Error(CommentStatus.COMMENT_NOT_FOUND);
   }
 
   if (comment.UserId !== UserId) {
-    return { success: false, message: ERROR_MESSAGES.FORBIDDEN };
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
 
   comment.title = title || comment.title;
@@ -129,14 +118,14 @@ const updateComment = async (
 };
 
 // Delete a comment
-const deleteComment = async (comment_id: number, UserId: number) : Promise<CommentResponse> => {
+const deleteComment = async (comment_id: number, UserId: number): Promise<CommentResponse> => {
   const comment = await Comment.findByPk(comment_id);
   if (!comment) {
-    return { success: false, message: CommentStatus.COMMENT_NOT_FOUND };
+    throw new Error(CommentStatus.COMMENT_NOT_FOUND);
   }
 
   if (comment.UserId !== UserId) {
-    return { success: false, message: ERROR_MESSAGES.FORBIDDEN };
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
 
   await comment.destroy();
@@ -154,10 +143,4 @@ const getCommentsByPostIdData = async (PostId: number) => {
   }
 };
 
-export {
-  createComment,
-  getCommentsByPostId,
-  updateComment,
-  deleteComment,
-  getCommentsByPostIdData,
-};
+export { createComment, getCommentsByPostId, updateComment, deleteComment, getCommentsByPostIdData };

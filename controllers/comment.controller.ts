@@ -15,12 +15,19 @@ const createComment = async (req: Request, res: Response): Promise<Response<Comm
   const { id } = req.user as Payload; // Extract UserId from authenticated user
   try {
     const result: CommentResponse = await createCommentService(title, content, PostId, ParentId, id);
-    if (!result.success) {
-      if (result.message === CommentStatus.POST_NOT_FOUND) return res.status(NOT_FOUND).json({ message: result.message });
-      return res.status(BAD_REQUEST).json({ message: result.message });
-    }
     return res.status(CREATED).json(result.comment);
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === CommentStatus.POST_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+      if (
+        error.message === CommentStatus.CANNOT_REPLY_TO_NON_EXISTING_COMMENT ||
+        error.message.startsWith(CommentStatus.COMMENT_NOT_ON_POST)
+      ) {
+        return res.status(BAD_REQUEST).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -30,9 +37,11 @@ const getCommentsByPostId = async (req: Request, res: Response): Promise<Respons
     const { post_id } = req.params;
     const postIdNumber = parseInt(post_id as string); // Explicitly cast post_id to string
     const result = await getCommentsByPostIdService(postIdNumber);
-    if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
     return res.status(OK).json(result.data);
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(NOT_FOUND).json({ message: error.message });
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -43,13 +52,17 @@ const updateComment = async (req: Request, res: Response): Promise<Response<Comm
   const { id } = req.user as Payload;
 
   try {
-    const result: CommentResponse= await updateCommentService(parseInt(comment_id), title, content, id);
-    if (!result.success) {
-      if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
-      return res.status(NOT_FOUND).json({ message: result.message });
-    }
+    const result: CommentResponse = await updateCommentService(parseInt(comment_id), title, content, id);
     return res.status(OK).json(result.comment);
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(UNAUTHORIZED).json({ message: error.message });
+      }
+      if (error.message === CommentStatus.COMMENT_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -60,14 +73,18 @@ const deleteComment = async (req: Request, res: Response): Promise<Response<Comm
 
   try {
     const result: CommentResponse = await deleteCommentService(parseInt(comment_id), id);
-    if (!result.success) {
-      if (result.message === ERROR_MESSAGES.FORBIDDEN) return res.status(UNAUTHORIZED).json({ message: result.message });
-      return res.status(NOT_FOUND).json({ message: result.message });
-    }
     return res.status(OK).json({ message: result.message });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(UNAUTHORIZED).json({ message: error.message });
+      }
+      if (error.message === CommentStatus.COMMENT_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 
-export { createComment, getCommentsByPostId, updateComment, deleteComment};
+export { createComment, getCommentsByPostId, updateComment, deleteComment };
