@@ -4,6 +4,12 @@ import configFile from "./db.config.ts";
 import { NODE_ENV } from "../../utils/settings.ts";
 dotenv.config();
 
+enum Environment {
+  Development = "development",
+  Test = "test",
+  Production = "production",
+}
+
 type DevelopmentOrTestConfig = {
   username: string;
   password: string;
@@ -23,13 +29,13 @@ type Config = {
   production: ProductionConfig;
 };
 
-const env = (NODE_ENV as keyof Config) || "development";
+const env = (NODE_ENV as keyof Config) || Environment.Development;
 
 const configFileTyped: Config = configFile as Config;
 const config = configFileTyped[env];
 
 let sequelize: Sequelize;
-if (env === "production") {
+if (env === Environment.Production) {
   const productionConfig = config as ProductionConfig;
   sequelize = new Sequelize(productionConfig.production_db_url, {
     dialect: productionConfig.dialect,
