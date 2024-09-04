@@ -12,16 +12,11 @@ const signUp = async (req: RequestBody<SignUpRequest>, res: Response): Promise<R
 
   try {
     const result: AuthResult = await signUpUser(name, email, password);
-
-    if (!result.success) {
-      return res.status(BAD_REQUEST).json({ message: result.message });
-    }
-
     return res.status(CREATED).json({ token: result.token });
   } catch (error : unknown) {
     if (error instanceof Error) {
-      //Error status update
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: error.message });
+      const statusCode = error.message === ERROR_MESSAGES.INTERNAL_SERVER ? INTERNAL_SERVER_ERROR : UNAUTHORIZED;
+      return res.status(statusCode).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
