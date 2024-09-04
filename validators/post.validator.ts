@@ -13,11 +13,11 @@ const updatePostValidationRules = [
 ];
 
 // Delete Post Validation Rules , +ve int check
-const deletePostValidationRules = [param("post_id").isInt().withMessage("Valid post ID is required")];
+const deletePostValidationRules = [param("post_id").isInt({ gt: 0 }).withMessage("Valid post ID is required")];
 
-const getPostByIdValidationRules = [param("post_id").isInt().withMessage("Valid post ID is required")];
+const getPostByIdValidationRules = [param("post_id").isInt({ gt: 0 }).withMessage("Valid post ID is required")];
 
-const getPostsByUserWithCommentsValidator = [param("user_id").isInt().withMessage("Valid user ID is required")];
+const getPostsByUserWithCommentsValidator = [param("user_id").isInt({ gt: 0 }).withMessage("Valid user ID is required")];
 
 const searchByTitleValidationRules = [
   query("page").optional().isInt({ gt: 0 }).withMessage("Valid page is required"),
