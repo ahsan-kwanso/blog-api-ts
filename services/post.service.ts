@@ -2,11 +2,18 @@ import Post from "../sequelize/models/post.model.ts";
 import User from "../sequelize/models/user.model.ts";
 import db from "../sequelize/models/index.ts";
 import { Request } from "express";
-import { Op } from 'sequelize';
+import { Op } from "sequelize";
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
 import { ERROR_MESSAGES, PostStatus } from "../utils/messages.ts";
-import { PostAttributes, PaginatedPostsResponse, ErrorResponse, PostWithUser, PostResponse, Post as PostModel } from "../types/post";
+import {
+  PostAttributes,
+  PaginatedPostsResponse,
+  ErrorResponse,
+  PostWithUser,
+  PostResponse,
+  Post as PostModel,
+} from "../types/post";
 
 const createPost = async (title: string, content: string, userId: number): Promise<PostModel> => {
   const post = await Post.create({ title, content, UserId: userId });
@@ -15,13 +22,12 @@ const createPost = async (title: string, content: string, userId: number): Promi
 
 //
 const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
-  const { filter } = req.query;
   const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
   const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   // Validate pagination parameters
   const pagination = validatePagination(page, limit);
   if (pagination.error) {
-    return { success: false, message: pagination.error };
+    throw new Error(pagination.error);
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
 
@@ -74,7 +80,7 @@ const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorR
   // Validate pagination parameters
   const pagination = validatePagination(page, limit);
   if (pagination.error) {
-    return { success: false, message: pagination.error };
+    throw new Error(pagination.error);
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
 
@@ -118,18 +124,23 @@ const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorR
 const getPostById = async (postId: number): Promise<{ success: boolean; post?: PostAttributes; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: PostStatus.POST_NOT_FOUND };
+    throw new Error(PostStatus.POST_NOT_FOUND);
   }
   return { success: true, post };
 };
 
-const updatePost = async (postId: number, title: string, content: string, userId: number): Promise<{ success: boolean; post?: PostAttributes; message?: string }> => {
+const updatePost = async (
+  postId: number,
+  title: string,
+  content: string,
+  userId: number
+): Promise<{ success: boolean; post?: PostAttributes; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: PostStatus.POST_NOT_FOUND };
+    throw new Error(PostStatus.POST_NOT_FOUND);
   }
   if (post.UserId !== userId) {
-    return { success: false, message: ERROR_MESSAGES.FORBIDDEN};
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
 
   post.title = title || post.title;
@@ -142,25 +153,25 @@ const updatePost = async (postId: number, title: string, content: string, userId
 const deletePost = async (postId: number, userId: number): Promise<{ success: boolean; message?: string }> => {
   const post = await Post.findByPk(postId);
   if (!post) {
-    return { success: false, message: PostStatus.POST_NOT_FOUND };
+    throw new Error(PostStatus.POST_NOT_FOUND);
   }
   if (post.UserId !== userId) {
-    return { success: false, message: ERROR_MESSAGES.FORBIDDEN};
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
 
   await post.destroy();
   return { success: true, message: PostStatus.POST_DELETED_SUCCESSFULLY };
 };
 
-const searchPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
+const searchPostsByTitle = async (req: Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { title } = req.query;
   const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
   const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
 
   // Validate pagination parameters
-  const pagination = validatePagination(page , limit );
+  const pagination = validatePagination(page, limit);
   if (pagination.error) {
-    return { success: false, message: pagination.error };
+    throw new Error(pagination.error);
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
   // Fetch posts with pagination and search by title
@@ -201,7 +212,7 @@ const searchPostsByTitle = async (req : Request): Promise<ErrorResponse | Pagina
   };
 };
 
-const searchUserPostsByTitle = async (req : Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
+const searchUserPostsByTitle = async (req: Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { title } = req.query;
   const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
   const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
@@ -210,10 +221,9 @@ const searchUserPostsByTitle = async (req : Request): Promise<ErrorResponse | Pa
   // Validate pagination parameters
   const pagination = validatePagination(page, limit);
   if (pagination.error) {
-    return { success: false, message: pagination.error };
+    throw new Error(pagination.error);
   }
   const { pageNumber = 1, pageSize = 10 } = pagination;
-
 
   // Fetch posts with pagination and search by title for the authenticated user
   const { count, rows } = await db.Post.findAndCountAll({
@@ -253,14 +263,4 @@ const searchUserPostsByTitle = async (req : Request): Promise<ErrorResponse | Pa
   };
 };
 
-export {
-  createPost,
-  getPosts,
-  getPostById,
-  updatePost,
-  deletePost,
-  searchPostsByTitle,
-  getMyPosts,
-  searchUserPostsByTitle,
-};
-
+export { createPost, getPosts, getPostById, updatePost, deletePost, searchPostsByTitle, getMyPosts, searchUserPostsByTitle };

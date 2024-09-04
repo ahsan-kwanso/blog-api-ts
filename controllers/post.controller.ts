@@ -9,8 +9,8 @@ import {
   getMyPosts as getMyPostsService,
   searchUserPostsByTitle as searchUserPostsByTitleService,
 } from "../services/post.service.ts";
-import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
-import { ERROR_MESSAGES } from "../utils/messages.ts";
+import { CREATED, INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN, BAD_REQUEST } from "http-status-codes";
+import { ERROR_MESSAGES, PostStatus } from "../utils/messages.ts";
 import { PostResult, PostsResult, Post as PostModel } from "../types/post";
 
 // Create a new post
@@ -19,7 +19,7 @@ const createPost = async (req: Request, res: Response): Promise<Response<PostMod
   const { id } = req.user as { id: number }; // Assuming `req.user` has an `id` field
 
   try {
-    const post : PostModel = await createPostService(title, content, id);
+    const post: PostModel = await createPostService(title, content, id);
     return res.status(CREATED).json({ post });
   } catch (error) {
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
@@ -47,7 +47,10 @@ const getPosts = async (req: Request, res: Response): Promise<Response<PostsResu
       nextPage: data.nextPage,
       posts: data.posts,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(BAD_REQUEST).json({ message: error.message });
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -55,12 +58,13 @@ const getPosts = async (req: Request, res: Response): Promise<Response<PostsResu
 // Get a single post by ID
 const getPostById = async (req: Request, res: Response): Promise<Response<PostResult>> => {
   const { post_id } = req.params;
-
   try {
     const result: PostResult = await getPostByIdService(parseInt(post_id));
-    if (!result.success) return res.status(NOT_FOUND).json({ message: result.message });
     return res.status(OK).json(result.post);
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(NOT_FOUND).json({ message: error.message });
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -73,12 +77,16 @@ const updatePost = async (req: Request, res: Response): Promise<Response<PostRes
 
   try {
     const result: PostResult = await updatePostService(parseInt(post_id), title, content, id);
-    if (!result.success) {
-      if (result.message === "Forbidden") return res.status(FORBIDDEN).json({ message: result.message });
-      return res.status(NOT_FOUND).json({ message: result.message });
-    }
     return res.status(OK).json(result.post);
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === PostStatus.POST_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(FORBIDDEN).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -90,12 +98,16 @@ const deletePost = async (req: Request, res: Response): Promise<Response<PostRes
 
   try {
     const result: PostResult = await deletePostService(parseInt(post_id), id);
-    if (!result.success) {
-      if (result.message === "Forbidden") return res.status(FORBIDDEN).json({ message: result.message });
-      return res.status(NOT_FOUND).json({ message: result.message });
-    }
     return res.status(OK).json({ message: result.message });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === PostStatus.POST_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(FORBIDDEN).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -119,10 +131,12 @@ const getPostsByTitle = async (req: Request, res: Response): Promise<Response<Po
       nextPage: data.nextPage,
       posts: data.posts,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(BAD_REQUEST).json({ message: error.message });
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
-
 
 export { createPost, getPosts, getPostById, updatePost, deletePost, getPostsByTitle };
