@@ -4,8 +4,8 @@ import {
   getAllUsers as getAllUsersService,
   getCurrentUser as getCurrentUserService,
 } from "../services/user.service.ts";
-import { INTERNAL_SERVER_ERROR, OK, NOT_FOUND } from "http-status-codes";
-import { ERROR_MESSAGES } from "../utils/messages.ts";
+import { INTERNAL_SERVER_ERROR, OK, NOT_FOUND, FORBIDDEN } from "http-status-codes";
+import { AuthStatus, ERROR_MESSAGES } from "../utils/messages.ts";
 import { UserResult, UsersResult } from "../types/user";
 
 // Controller function to get a single user by ID
@@ -19,7 +19,15 @@ const getUser = async (req: Request, res: Response): Promise<Response<UserResult
       return res.status(NOT_FOUND).json({ message: result.message });
     }
     return res.status(OK).json({ user: result.user });
-  } catch (error : unknown) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === AuthStatus.USER_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(FORBIDDEN).json({ message: error.message });
+      }
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -28,11 +36,8 @@ const getUser = async (req: Request, res: Response): Promise<Response<UserResult
 const getAllUsers = async (req: Request, res: Response): Promise<Response<UsersResult>> => {
   try {
     const result: UsersResult = await getAllUsersService();
-    if (!result.success) {
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: "" });
-    }
     return res.status(OK).json({ users: result.users });
-  } catch (error : unknown) {
+  } catch (error: unknown) {
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
@@ -46,8 +51,13 @@ const getCurrentUser = async (req: Request, res: Response): Promise<Response<Use
       return res.status(NOT_FOUND).json({ message: result.message }); // Not found
     }
     return res.status(OK).json({ user: result.user }); // Success
-  } catch (error : unknown) {
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER }); // Internal error
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message === AuthStatus.USER_NOT_FOUND) {
+        return res.status(NOT_FOUND).json({ message: error.message });
+      }
+    }
+    return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
 };
 

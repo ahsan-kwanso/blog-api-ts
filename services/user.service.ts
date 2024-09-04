@@ -7,10 +7,10 @@ const getUserById = async (userId: number, id: number): Promise<UserResult> => {
   // Fetch user information by ID
   const user = await User.findByPk(userId);
   if (!user) {
-    return { success: false, message: AuthStatus.USER_NOT_FOUND };
+    throw new Error(AuthStatus.USER_NOT_FOUND);
   }
   if (userId !== id) {
-    return { success: false, message: ERROR_MESSAGES.FORBIDDEN };
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
   return { success: true, user };
 };
@@ -20,7 +20,7 @@ const getCurrentUser = async (userId: number): Promise<UserResult> => {
   // Fetch user information by ID
   const user = await User.findByPk(userId);
   if (!user) {
-    return { success: false, message: AuthStatus.USER_NOT_FOUND };
+    throw new Error(AuthStatus.USER_NOT_FOUND);
   }
   return { success: true, user };
 };
