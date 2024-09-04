@@ -13,7 +13,7 @@ export interface PostCreationAttributes
 export type PostInstance = data<PostAttributes, PostCreationAttributes>;
 
 // Common Post type
-interface Post extends PostAttributes {
+export interface Post extends PostAttributes {
   createdAt: Date;
   updatedAt: Date;
 }

@@ -6,9 +6,9 @@ import { Op } from 'sequelize';
 import { validatePagination, generateNextPageUrl } from "../utils/pagination.ts";
 import paginationConfig from "../utils/pagination.config.ts";
 import { ERROR_MESSAGES, PostStatus } from "../utils/messages.ts";
-import { PostAttributes, PaginatedPostsResponse, ErrorResponse, PostWithUser, PostResponse } from "../types/post";
+import { PostAttributes, PaginatedPostsResponse, ErrorResponse, PostWithUser, PostResponse, Post as PostModel } from "../types/post";
 
-const createPost = async (title: string, content: string, userId: number): Promise<PostAttributes> => {
+const createPost = async (title: string, content: string, userId: number): Promise<PostModel> => {
   const post = await Post.create({ title, content, UserId: userId });
   return post;
 };

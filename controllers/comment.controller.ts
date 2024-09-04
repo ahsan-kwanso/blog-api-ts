@@ -10,7 +10,7 @@ import { ERROR_MESSAGES, CommentStatus } from "../utils/messages.ts";
 import { CommentResponse } from "../types/comment";
 import { Payload } from "../types/module";
 
-const createComment = async (req: Request, res: Response): Promise<Response> => {
+const createComment = async (req: Request, res: Response): Promise<Response<CommentResponse>> => {
   const { title = "reply", content, PostId, ParentId } = req.body;
   const { id } = req.user as Payload; // Extract UserId from authenticated user
   try {
@@ -37,7 +37,7 @@ const getCommentsByPostId = async (req: Request, res: Response): Promise<Respons
   }
 };
 
-const updateComment = async (req: Request, res: Response): Promise<Response> => {
+const updateComment = async (req: Request, res: Response): Promise<Response<CommentResponse>> => {
   const { comment_id } = req.params;
   const { title, content } = req.body;
   const { id } = req.user as Payload;
@@ -54,7 +54,7 @@ const updateComment = async (req: Request, res: Response): Promise<Response> => 
   }
 };
 
-const deleteComment = async (req: Request, res: Response): Promise<Response> => {
+const deleteComment = async (req: Request, res: Response): Promise<Response<CommentResponse>> => {
   const { comment_id } = req.params;
   const { id } = req.user as Payload;
 
