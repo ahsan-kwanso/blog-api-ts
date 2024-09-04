@@ -16,7 +16,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string) as Payload; // Explicitly type the decoded token
+    const decoded = jwt.verify(token, JWT_SECRET) as Payload; // Explicitly type the decoded token
     req.user = decoded; // Assign the decoded token to req.user
     next();
   } catch (ex) {
