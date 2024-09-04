@@ -1,9 +1,9 @@
 import { sequelize } from "../config/sequelize.ts";
 import { DataTypes } from "sequelize";
-import { CommentInstance } from "../../types/comment";
-import { IDb } from "../../types/models";
+import { CommentInstance } from "../../types/models/comment";
+import { IDb } from "../../types/models/models";
 
-const Comment : CommentInstance = sequelize.define<CommentInstance>("Comments", {
+const Comment: CommentInstance = sequelize.define<CommentInstance>("Comments", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -43,8 +43,7 @@ const Comment : CommentInstance = sequelize.define<CommentInstance>("Comments", 
   },
 });
 
-
-Comment.associate = (models : IDb) => {
+Comment.associate = (models: IDb) => {
   Comment.belongsTo(models.User, {
     foreignKey: "UserId",
   });

@@ -7,10 +7,6 @@ export interface PostAttributes {
   UserId: number;
 }
 
-export interface PostCreationAttributes extends Optional<PostAttributes, "id" | "UserId"> {}
-
-export type PostInstance = data<PostAttributes, PostCreationAttributes>;
-
 // Common Post type
 export interface Post extends PostAttributes {
   createdAt: Date;

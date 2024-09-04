@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/sequelize.ts";
 import bcrypt from "bcrypt";
-import { UserInstance } from "../../types/user";
-import { IDb } from "../../types/models";
+import { UserInstance } from "../../types/models/user";
+import { IDb } from "../../types/models/models";
 
 const User: UserInstance = sequelize.define<UserInstance>(
   "Users",
@@ -40,7 +40,7 @@ const User: UserInstance = sequelize.define<UserInstance>(
       },
     },
     hooks: {
-      beforeSave: async (user : UserInstance) => {
+      beforeSave: async (user: UserInstance) => {
         if (user.changed("password")) {
           const salt = await bcrypt.genSalt(10);
           user.password = await bcrypt.hash(user.password, salt);
@@ -50,8 +50,7 @@ const User: UserInstance = sequelize.define<UserInstance>(
   }
 );
 
-
-User.associate = function (models : IDb) {
+User.associate = function (models: IDb) {
   User.hasMany(models.Post, {
     foreignKey: "UserId",
     onDelete: "CASCADE",

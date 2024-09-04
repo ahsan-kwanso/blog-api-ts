@@ -1,7 +1,7 @@
 import { sequelize } from "../config/sequelize.ts";
 import { DataTypes } from "sequelize";
-import { PostInstance } from "../../types/post";
-import { IDb } from "../../types/models";
+import { PostInstance } from "../../types/models/post";
+import { IDb } from "../../types/models/models";
 
 const Post: PostInstance = sequelize.define<PostInstance>("Posts", {
   id: {
@@ -26,7 +26,6 @@ const Post: PostInstance = sequelize.define<PostInstance>("Posts", {
     },
   },
 });
-
 
 Post.associate = (models: IDb) => {
   Post.belongsTo(models.User, {

@@ -3,8 +3,7 @@ import { Sequelize } from "sequelize";
 import User from "./user.model.ts";
 import Post from "./post.model.ts";
 import Comment from "./comment.model.ts";
-import { IDb } from "../../types/models";
-
+import { IDb } from "../../types/models/models";
 
 enum DbModelNames {
   User = "User",
@@ -24,7 +23,6 @@ db.Comment = Comment;
     model.associate(db);
   }
 });
-
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
