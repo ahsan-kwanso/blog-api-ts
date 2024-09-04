@@ -5,7 +5,7 @@ import { ERROR_MESSAGES } from "../utils/messages.ts";
 import { SignUpRequest, AuthResult, SignInRequest } from "../types/user";
 
 type RequestBody<T> = Request<{}, {}, T>;
-//modify request make a generic for request pass body and param 
+//modify request make a generic for request pass body and param
 //declare type for response e.g message token status
 const signUp = async (req: RequestBody<SignUpRequest>, res: Response): Promise<Response<AuthResult>> => {
   const { name, email, password } = req.body;
@@ -13,9 +13,9 @@ const signUp = async (req: RequestBody<SignUpRequest>, res: Response): Promise<R
   try {
     const result: AuthResult = await signUpUser(name, email, password);
     return res.status(CREATED).json({ token: result.token });
-  } catch (error : unknown) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
-      const statusCode = error.message === ERROR_MESSAGES.INTERNAL_SERVER ? INTERNAL_SERVER_ERROR : UNAUTHORIZED;
+      const statusCode = error.message === ERROR_MESSAGES.INTERNAL_SERVER ? INTERNAL_SERVER_ERROR : BAD_REQUEST;
       return res.status(statusCode).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
@@ -33,9 +33,10 @@ const signIn = async (req: RequestBody<SignInRequest>, res: Response): Promise<R
     }
 
     return res.status(OK).json({ token: result.token });
-  } catch (error : unknown) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: error.message });
+      const statusCode = error.message === ERROR_MESSAGES.INTERNAL_SERVER ? INTERNAL_SERVER_ERROR : UNAUTHORIZED;
+      return res.status(statusCode).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
   }
