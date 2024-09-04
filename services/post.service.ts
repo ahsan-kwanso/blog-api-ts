@@ -21,16 +21,9 @@ const createPost = async (title: string, content: string, userId: number): Promi
 };
 
 //
-const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
-  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
-  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
-  // Validate pagination parameters
-  const pagination = validatePagination(page, limit);
-  if (pagination.error) {
-    throw new Error(pagination.error);
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
-
+const getPosts = async (req: Request): Promise<PaginatedPostsResponse> => {
+  const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   // Fetch posts with pagination
   const { count, rows } = await db.Post.findAndCountAll({
     limit: pageSize,
@@ -65,10 +58,10 @@ const getPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorRes
   };
 };
 
-const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorResponse> => {
+const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse> => {
   const { filter } = req.query;
-  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
-  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
+  const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   const userId = req.query.userId as string;
 
   if (!userId) {
@@ -76,13 +69,6 @@ const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse | ErrorR
   }
 
   const numericUserId = Number(userId);
-
-  // Validate pagination parameters
-  const pagination = validatePagination(page, limit);
-  if (pagination.error) {
-    throw new Error(pagination.error);
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
 
   // Fetch posts with pagination
   const { count, rows } = await db.Post.findAndCountAll({
@@ -165,15 +151,9 @@ const deletePost = async (postId: number, userId: number): Promise<{ success: bo
 
 const searchPostsByTitle = async (req: Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { title } = req.query;
-  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
-  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
+  const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
 
-  // Validate pagination parameters
-  const pagination = validatePagination(page, limit);
-  if (pagination.error) {
-    throw new Error(pagination.error);
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
   // Fetch posts with pagination and search by title
   const { count, rows } = await db.Post.findAndCountAll({
     where: {
@@ -214,16 +194,10 @@ const searchPostsByTitle = async (req: Request): Promise<ErrorResponse | Paginat
 
 const searchUserPostsByTitle = async (req: Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
   const { title } = req.query;
-  const page = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
-  const limit = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
+  const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
+  const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   const userId = req.query.userId; // Extract UserId from query as sent from front end
   const numericUserId = Number(userId);
-  // Validate pagination parameters
-  const pagination = validatePagination(page, limit);
-  if (pagination.error) {
-    throw new Error(pagination.error);
-  }
-  const { pageNumber = 1, pageSize = 10 } = pagination;
 
   // Fetch posts with pagination and search by title for the authenticated user
   const { count, rows } = await db.Post.findAndCountAll({
