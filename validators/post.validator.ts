@@ -19,7 +19,9 @@ const getPostByIdValidationRules = [param("post_id").isInt().withMessage("Valid 
 
 const getPostsByUserWithCommentsValidator = [param("user_id").isInt().withMessage("Valid user ID is required")];
 
-const searchByTitleOrContentValidator = [
+const searchByTitleValidationRules = [
+  query("page").optional().isInt({ gt: 0 }).withMessage("Valid page is required"),
+  query("limit").optional().isInt({ gt: 0 }).withMessage("Valid limit is required"),
   query("title").optional().isString().withMessage("Title must be a string"),
   query("content").optional().isString().withMessage("Content must be a string"),
 ];
@@ -29,6 +31,6 @@ export {
   updatePostValidationRules,
   deletePostValidationRules,
   getPostByIdValidationRules,
-  searchByTitleOrContentValidator,
+  searchByTitleValidationRules,
   getPostsByUserWithCommentsValidator,
 };
