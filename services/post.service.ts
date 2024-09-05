@@ -59,13 +59,16 @@ const getPosts = async (req: Request): Promise<PaginatedPostsResponse> => {
 };
 
 const getMyPosts = async (req: Request): Promise<PaginatedPostsResponse> => {
-  const { filter } = req.query;
+  const { id } = req.user as { id: number };
   const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
   const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
   const userId = req.query.userId as string;
 
   if (!userId) {
     return { success: true, posts: [], total: 0, nextPage: null }; // Return an empty result
+  }
+  if (id !== parseInt(userId)) {
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
   }
 
   const numericUserId = Number(userId);
@@ -193,12 +196,16 @@ const searchPostsByTitle = async (req: Request): Promise<ErrorResponse | Paginat
 };
 
 const searchUserPostsByTitle = async (req: Request): Promise<ErrorResponse | PaginatedPostsResponse> => {
+  const { id } = req.user as { id: number };
   const { title } = req.query;
   const pageNumber = parseInt(req.query.page as string, 10) || paginationConfig.defaultPage;
   const pageSize = parseInt(req.query.limit as string, 10) || paginationConfig.defaultLimit;
-  const userId = req.query.userId; // Extract UserId from query as sent from front end
+  const userId = req.query.userId as string; // Extract UserId from query as sent from front end
   const numericUserId = Number(userId);
 
+  if (id !== parseInt(userId)) {
+    throw new Error(ERROR_MESSAGES.FORBIDDEN);
+  }
   // Fetch posts with pagination and search by title for the authenticated user
   const { count, rows } = await db.Post.findAndCountAll({
     where: {

@@ -49,6 +49,9 @@ const getPosts = async (req: Request, res: Response): Promise<Response<PostsResu
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(FORBIDDEN).json({ message: error.message });
+      }
       return res.status(BAD_REQUEST).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
@@ -133,6 +136,9 @@ const getPostsByTitle = async (req: Request, res: Response): Promise<Response<Po
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
+      if (error.message === ERROR_MESSAGES.FORBIDDEN) {
+        return res.status(FORBIDDEN).json({ message: error.message });
+      }
       return res.status(BAD_REQUEST).json({ message: error.message });
     }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: ERROR_MESSAGES.INTERNAL_SERVER });
